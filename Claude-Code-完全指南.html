@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code 完全指南 v6.0</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+    <style>
+        :root {
+            --space-unit: 8px;
+            --space-xs: calc(var(--space-unit) * 1);
+            --space-sm: calc(var(--space-unit) * 1.5);
+            --space-md: calc(var(--space-unit) * 2);
+            --space-lg: calc(var(--space-unit) * 3);
+            --space-xl: calc(var(--space-unit) * 4);
+            --space-2xl: calc(var(--space-unit) * 6);
+
+            --accent: oklch(65% 0.16 285);
+            --accent-rgb: 160, 115, 215;
+            --accent-soft: color-mix(in oklch, var(--accent), transparent 85%);
+            --accent-hover: color-mix(in oklch, var(--accent), black 8%);
+
+            --spring-green: #2f845e;
+            --spring-green-light: #e8f4ee;
+
+            --happy-blue: #c0e6ff;
+            --happy-red: #fe5f58;
+            --happy-purple: #a68bff;
+            --happy-yellow: #fbe598;
+
+            --bg-primary: linear-gradient(135deg, #c0e6ff 0%, #e8f4ee 50%, #f3f0ff 100%);
+            --bg-content: rgba(255, 255, 255, 0.95);
+            --bg-sidebar: rgba(255, 255, 255, 0.92);
+            --bg-code: #292d3e;
+
+            --text-primary: #282c34;
+            --text-secondary: #5a6270;
+            --text-muted: #8b929c;
+
+            --border-color: rgba(0, 0, 0, 0.08);
+            --border-accent: rgba(160, 115, 215, 0.3);
+            --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.12);
+            --shadow-xl: 0 32px 80px rgba(0, 0, 0, 0.15);
+
+            --code-dot-red: #fc625d;
+            --code-dot-yellow: #fdbc40;
+            --code-dot-green: #34c759;
+
+            --font-sans: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+            --font-mono: "Fira Code", "SF Mono", Monaco, Consolas, monospace;
+
+            --sidebar-width: 320px;
+            --header-height: 56px;
+
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg-primary);
+            background-attachment: fixed;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--bg-content);
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            padding: 0 var(--space-xl);
+            gap: var(--space-md);
+            transition: transform var(--transition-normal), opacity var(--transition-normal);
+        }
+
+        body.fullscreen .header {
+            transform: translateY(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.fullscreen:hover .header {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .header-title .icon {
+            font-size: 1.4rem;
+        }
+
+        .header-version {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-soft);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .header-btn {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-btn:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .header-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        /* Floating TOC Button */
+        .toc-fab {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--accent), var(--spring-green));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            z-index: 200;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-normal);
+        }
+
+        .toc-fab:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .toc-fab.active {
+            background: var(--happy-red);
+        }
+
+        body.fullscreen .toc-fab {
+            bottom: 32px;
+            left: 32px;
+        }
+
+        /* Floating Sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            z-index: 250;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            overflow-y: auto;
+            z-index: 300;
+            transform: translateX(-100%);
+            transition: transform var(--transition-normal);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, rgba(160, 115, 215, 0.3), rgba(47, 132, 94, 0.3));
+            border-radius: 2px;
+        }
+
+        .sidebar-header {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: var(--bg-sidebar);
+            z-index: 10;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .sidebar-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all var(--transition-fast);
+        }
+
+        .sidebar-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-primary);
+        }
+
+        .sidebar-content {
+            padding: var(--space-md);
+        }
+
+        .sidebar-section {
+            margin-bottom: var(--space-sm);
+        }
+
+        .sidebar-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px var(--space-md);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all var(--transition-fast);
+            user-select: none;
+        }
+
+        .sidebar-section-header:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .sidebar-section-header .toggle-icon {
+            font-size: 0.7rem;
+            transition: transform var(--transition-fast);
+        }
+
+        .sidebar-section.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .sidebar-section.collapsed .sidebar-section-items {
+            display: none;
+        }
+
+        .sidebar-section-items {
+            padding-left: var(--space-sm);
+        }
+
+        .nav-item {
+            display: block;
+            padding: 8px var(--space-md);
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 2px;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .nav-item.active {
+            background: var(--accent);
+            color: white;
+            font-weight: 500;
+        }
+
+        .nav-item.level-2 {
+            padding-left: calc(var(--space-md) + 12px);
+            font-size: 0.82rem;
+        }
+
+        .nav-item.level-3 {
+            padding-left: calc(var(--space-md) + 24px);
+            font-size: 0.78rem;
+        }
+
+        /* Main Content */
+        .main {
+            min-height: 100vh;
+            padding: calc(var(--header-height) + var(--space-2xl)) var(--space-2xl) var(--space-2xl);
+            transition: padding var(--transition-normal);
+        }
+
+        body.fullscreen .main {
+            padding: var(--space-2xl);
+            padding-bottom: calc(var(--space-2xl) + 60px);
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-content);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: var(--space-2xl);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+        }
+
+        body.fullscreen .content-wrapper {
+            max-width: 1100px;
+            border-radius: 20px;
+            padding: var(--space-2xl) calc(var(--space-2xl) * 1.5);
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 3px solid var(--accent);
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--spring-green), var(--happy-blue));
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: var(--space-xl) 0 var(--space-md);
+            padding-left: var(--space-md);
+            border-left: 4px solid var(--accent);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: var(--space-lg) 0 var(--space-sm);
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: var(--space-md) 0 var(--space-sm);
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--bg-code);
+            border-radius: 10px;
+            padding: var(--space-md);
+            margin: var(--space-md) 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        pre::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--code-dot-red);
+            box-shadow: 16px 0 0 var(--code-dot-yellow), 32px 0 0 var(--code-dot-green);
+        }
+
+        pre code {
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            padding-top: 20px;
+            display: block;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            background: rgba(160, 115, 215, 0.1);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        /* Blockquotes */
+        blockquote {
+            background: linear-gradient(135deg, rgba(47, 132, 94, 0.08), rgba(160, 115, 215, 0.08));
+            border-left: 4px solid var(--spring-green);
+            padding: var(--space-md) var(--space-lg);
+            margin: var(--space-md) 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        blockquote p {
+            margin-bottom: 0;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-md) 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: linear-gradient(135deg, rgba(160, 115, 215, 0.1), rgba(47, 132, 94, 0.1));
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        tr:hover td {
+            background: rgba(160, 115, 215, 0.05);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: var(--space-md) 0;
+            padding-left: var(--space-xl);
+        }
+
+        li {
+            margin-bottom: var(--space-xs);
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        /* Diagrams */
+        .diagram {
+            background: linear-gradient(135deg, rgba(192, 230, 255, 0.3), rgba(243, 240, 255, 0.3));
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            overflow-x: auto;
+        }
+
+        .diagram pre {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .diagram pre::before {
+            display: none;
+        }
+
+        .diagram code {
+            background: transparent;
+            color: var(--text-primary);
+            padding: 0;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: linear-gradient(135deg, rgba(192, 230, 255, 0.2), rgba(232, 244, 238, 0.2));
+            border: 1px solid var(--border-accent);
+            border-radius: 12px;
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        .info-card-title {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* Chapter Header */
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .chapter-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent), var(--spring-green));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .chapter-title {
+            flex: 1;
+        }
+
+        .chapter-title h2 {
+            margin: 0;
+            padding: 0;
+            border: none;
+        }
+
+        .chapter-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+
+        .feature-card {
+            background: var(--bg-content);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: var(--space-lg);
+            transition: all var(--transition-normal);
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .feature-card-icon {
+            font-size: 2rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .feature-card-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+
+        .feature-card-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--border-color);
+            z-index: 150;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--spring-green));
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        /* Fullscreen Exit Hint */
+        .fullscreen-hint {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 10px 16px;
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+            z-index: 100;
+        }
+
+        body.fullscreen .fullscreen-hint {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Print Styles */
+        @media print {
+            .header, .sidebar, .sidebar-overlay, .toc-fab, .progress-bar, .fullscreen-hint {
+                display: none !important;
+            }
+            .main {
+                padding: 20px !important;
+            }
+            .content-wrapper {
+                box-shadow: none !important;
+                max-width: 100% !important;
+            }
+            body.fullscreen .content-wrapper {
+                max-width: 100% !important;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main {
+                padding: calc(var(--header-height) + var(--space-lg)) var(--space-md) var(--space-lg);
+            }
+            .content-wrapper {
+                padding: var(--space-lg);
+            }
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-bar-fill" id="progress"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-title">
+            <span class="icon">📘</span>
+            Claude Code 完全指南
+            <span class="header-version">v6.0</span>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" onclick="toggleSidebar()">☰ 目录</button>
+            <button class="header-btn" id="fullscreenBtn" onclick="toggleFullscreen()">⛶ 全屏</button>
+            <button class="header-btn" onclick="window.print()">🖨 打印</button>
+        </div>
+    </header>
+
+    <!-- TOC FAB Button -->
+    <button class="toc-fab" id="tocFab" onclick="toggleSidebar()">☰</button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">
+                <span>📑</span> 目录导航
+            </div>
+            <button class="sidebar-close" onclick="toggleSidebar()">×</button>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-section">
+                <div class="sidebar-section-header" onclick="toggleSection(this)">
+                    <span>序言</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="sidebar-section-items">
+                    <a class="nav-item" href="#序言">序言</a>
+                    <a class="nav-item level-2" href="#关于本书">关于本书</a>
+                    <a class="nav-item level-2" href="#阅读建议">阅读建议</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header" onclick="toggleSection(this)">
+                    <span>第一部分：快速上手</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="sidebar-section-items">
+                    <a class="nav-item" href="#第1章-认识-claude-code">第1章 认识 Claude Code</a>
+                    <a class="nav-item" href="#第2章-安装与配置">第2章 安装与配置</a>
+                    <a class="nav-item" href="#第3章-核心概念">第3章 核心概念</a>
+                    <a class="nav-item" href="#第4章-目录结构">第4章 目录结构</a>
+                    <a class="nav-item" href="#第5章-第一个项目">第5章 第一个项目</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header" onclick="toggleSection(this)">
+                    <span>第二部分：功能详解</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="sidebar-section-items">
+                    <a class="nav-item" href="#第6章-记忆系统">第6章 记忆系统</a>
+                    <a class="nav-item" href="#第7章-钩子系统">第7章 钩子系统</a>
+                    <a class="nav-item" href="#第8章-命令行工具">第8章 命令行工具</a>
+                    <a class="nav-item" href="#第9章-技能系统">第9章 技能系统</a>
+                    <a class="nav-item" href="#第10章-插件系统">第10章 插件系统</a>
+                    <a class="nav-item" href="#第11章-提示词系统">第11章 提示词系统</a>
+                    <a class="nav-item" href="#第12章-工具集">第12章 工具集</a>
+                    <a class="nav-item" href="#第13章-mcp-协议">第13章 MCP 协议</a>
+                    <a class="nav-item" href="#第14章-子代理系统">第14章 子代理系统</a>
+                    <a class="nav-item" href="#第15章-新功能">第15章 新功能</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header" onclick="toggleSection(this)">
+                    <span>第三部分：编写指南</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="sidebar-section-items">
+                    <a class="nav-item" href="#第16章-如何写好-claudemd">第16章 如何写好 CLAUDE.md</a>
+                    <a class="nav-item" href="#第17章-如何写好-skills">第17章 如何写好 Skills</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header" onclick="toggleSection(this)">
+                    <span>后续章节</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="sidebar-section-items">
+                    <a class="nav-item" href="#后续章节">后续章节概览</a>
+                    <a class="nav-item" href="#附录">附录</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="content-wrapper">
+            <h1>Claude Code 完全指南</h1>
+
+            <blockquote>
+                <p><strong>版本：</strong> 6.0.0<br>
+                <strong>更新日期：</strong> 2026-04-07<br>
+                <strong>适用版本：</strong> Claude Code CLI v1.x</p>
+            </blockquote>
+
+            <!-- 序言 -->
+            <section id="序言">
+                <h2>序言</h2>
+
+                <h3 id="关于本书">关于本书</h3>
+                <p>Claude Code 是 Anthropic 官方推出的 AI 编程助手命令行工具，它将 Claude AI 的强大能力直接带入您的终端。与传统的 IDE 插件不同，Claude Code 深度集成了文件系统、Git 工作流和命令行工具，能够真正理解您的项目并进行智能化的代码操作。</p>
+                <p>本书旨在为开发者提供一份全面、深入的 Claude Code 学习指南，从快速上手到源码分析，帮助您充分利用这一强大的 AI 编程工具。</p>
+
+                <h3 id="阅读建议">阅读建议</h3>
+                <ul>
+                    <li><strong>初学者</strong>：建议从第一部分开始，按顺序阅读</li>
+                    <li><strong>有经验用户</strong>：可直接跳转到功能详解或实战场景部分</li>
+                    <li><strong>架构师/高级开发者</strong>：重点关注深入原理和生态融合部分</li>
+                </ul>
+            </section>
+
+            <!-- 第一部分：快速上手 -->
+            <section id="第一部分快速上手">
+                <h2>第一部分：快速上手</h2>
+
+                <!-- 第1章 -->
+                <article id="第1章-认识-claude-code">
+                    <div class="chapter-header">
+                        <div class="chapter-number">1</div>
+                        <div class="chapter-title">
+                            <h2>认识 Claude Code</h2>
+                            <div class="chapter-subtitle">了解 Claude Code 的核心特性与优势</div>
+                        </div>
+                    </div>
+
+                    <h3>什么是 Claude Code</h3>
+                    <p>Claude Code 是 Anthropic 官方推出的命令行 AI 编程助手，它具有以下核心特点：</p>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-card-icon">💻</div>
+                            <div class="feature-card-title">终端原生</div>
+                            <div class="feature-card-desc">直接在命令行中运行，无需 IDE 插件，与 Shell 环境深度集成</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-icon">🧠</div>
+                            <div class="feature-card-title">上下文感知</div>
+                            <div class="feature-card-desc">自动理解项目结构，读取相关文件内容，保持对话历史</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-icon">🔧</div>
+                            <div class="feature-card-title">工具链集成</div>
+                            <div class="feature-card-desc">内置文件操作工具，Git 工作流支持，命令执行能力</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-icon">🔌</div>
+                            <div class="feature-card-title">灵活扩展</div>
+                            <div class="feature-card-desc">支持自定义工具、技能和插件，MCP 协议集成</div>
+                        </div>
+                    </div>
+
+                    <h3>与其他工具对比</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>特性</th>
+                                <th>Claude Code</th>
+                                <th>Cursor</th>
+                                <th>GitHub Copilot</th>
+                                <th>Claude.ai</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>运行环境</td>
+                                <td>✅ 终端</td>
+                                <td>IDE</td>
+                                <td>IDE</td>
+                                <td>Web</td>
+                            </tr>
+                            <tr>
+                                <td>项目级理解</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                            </tr>
+                            <tr>
+                                <td>命令执行</td>
+                                <td>✅</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                            </tr>
+                            <tr>
+                                <td>自定义工具</td>
+                                <td>✅</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>核心优势</h3>
+                    <ol>
+                        <li><strong>真正的代码理解</strong>：能够阅读整个项目，理解代码结构和依赖关系</li>
+                        <li><strong>安全的命令执行</strong>：在用户确认后执行 Shell 命令</li>
+                        <li><strong>灵活的扩展性</strong>：支持自定义工具、技能和插件</li>
+                        <li><strong>强大的记忆系统</strong>：跨会话保持上下文和项目知识</li>
+                    </ol>
+                </article>
+
+                <!-- 第2章 -->
+                <article id="第2章-安装与配置">
+                    <div class="chapter-header">
+                        <div class="chapter-number">2</div>
+                        <div class="chapter-title">
+                            <h2>安装与配置</h2>
+                            <div class="chapter-subtitle">快速完成 Claude Code 的安装与基础配置</div>
+                        </div>
+                    </div>
+
+                    <h3>系统要求</h3>
+                    <ul>
+                        <li><strong>操作系统</strong>：macOS、Linux、Windows (WSL2)</li>
+                        <li><strong>Node.js</strong>：v18.0.0 或更高版本</li>
+                        <li><strong>网络</strong>：需要访问 Anthropic API</li>
+                    </ul>
+
+                    <h3>安装步骤</h3>
+
+                    <h4>macOS / Linux</h4>
+                    <pre><code class="language-bash"># 使用 npm 全局安装
+npm install -g @anthropic-ai/claude-code
+
+# 或使用官方安装脚本
+curl -fsSL https://claude.ai/install.sh | sh</code></pre>
+
+                    <h4>Windows (WSL2)</h4>
+                    <pre><code class="language-bash"># 在 WSL2 环境中安装
+npm install -g @anthropic-ai/claude-code</code></pre>
+
+                    <h4>验证安装</h4>
+                    <pre><code class="language-bash">claude --version
+# 输出: claude-code v1.x.x</code></pre>
+
+                    <h3>认证配置</h3>
+                    <pre><code class="language-bash"># 登录 Anthropic 账户
+claude login
+
+# 或设置 API Key
+export ANTHROPIC_API_KEY=your_api_key_here</code></pre>
+
+                    <h3>基础配置</h3>
+                    <p>Claude Code 的配置文件位于 <code>~/.claude/config.json</code>：</p>
+                    <pre><code class="language-json">{
+  "model": "claude-sonnet-4-6",
+  "maxTokens": 4096,
+  "temperature": 0.7,
+  "autoApprove": false,
+  "permissions": {
+    "allow": ["Read", "Glob", "Grep"],
+    "deny": ["Bash"]
+  }
+}</code></pre>
+                </article>
+
+                <!-- 第3章 -->
+                <article id="第3章-核心概念">
+                    <div class="chapter-header">
+                        <div class="chapter-number">3</div>
+                        <div class="chapter-title">
+                            <h2>核心概念</h2>
+                            <div class="chapter-subtitle">理解 Claude Code 的核心架构</div>
+                        </div>
+                    </div>
+
+                    <h3>会话（Session）</h3>
+                    <p>会话是 Claude Code 工作的基本单元，包含：</p>
+                    <ul>
+                        <li><strong>对话历史</strong>：用户与 AI 的交互记录</li>
+                        <li><strong>上下文窗口</strong>：当前可用的 Token 空间</li>
+                        <li><strong>工作目录</strong>：项目根目录</li>
+                    </ul>
+
+                    <div class="diagram">
+                        <pre><code>┌─────────────────────────────────────┐
+│           Session                    │
+├─────────────────────────────────────┤
+│  ┌─────────────────────────────┐    │
+│  │     Conversation History     │    │
+│  │  - User Message 1            │    │
+│  │  - Assistant Response 1      │    │
+│  │  - User Message 2            │    │
+│  │  - Assistant Response 2      │    │
+│  └─────────────────────────────┘    │
+│                                      │
+│  ┌─────────────────────────────┐    │
+│  │     Context Window           │    │
+│  │  - System Prompt             │    │
+│  │  - CLAUDE.md Content         │    │
+│  │  - File Contents             │    │
+│  │  - Tool Definitions          │    │
+│  └─────────────────────────────┘    │
+│                                      │
+│  Working Directory: /project/root    │
+└─────────────────────────────────────┘</code></pre>
+                    </div>
+
+                    <h3>工具系统</h3>
+                    <p>Claude Code 内置多种工具，AI 可根据需要调用：</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>工具</th>
+                                <th>功能</th>
+                                <th>权限级别</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Read</td><td>读取文件内容</td><td>低风险</td></tr>
+                            <tr><td>Write</td><td>写入文件内容</td><td>高风险</td></tr>
+                            <tr><td>Edit</td><td>编辑文件</td><td>高风险</td></tr>
+                            <tr><td>Bash</td><td>执行 Shell 命令</td><td>高风险</td></tr>
+                            <tr><td>Grep</td><td>搜索文件内容</td><td>低风险</td></tr>
+                            <tr><td>Glob</td><td>匹配文件路径</td><td>低风险</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>模型选择</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>模型</th>
+                                <th>特点</th>
+                                <th>适用场景</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Haiku 4.5</strong></td>
+                                <td>快速、经济</td>
+                                <td>简单查询、代码补全</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sonnet 4.6</strong></td>
+                                <td>平衡性能与成本</td>
+                                <td>日常开发、代码重构</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Opus 4.6</strong></td>
+                                <td>最强推理能力</td>
+                                <td>复杂架构设计、难题分析</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+
+                <!-- 第4章 -->
+                <article id="第4章-目录结构">
+                    <div class="chapter-header">
+                        <div class="chapter-number">4</div>
+                        <div class="chapter-title">
+                            <h2>目录结构</h2>
+                            <div class="chapter-subtitle">理解并正确配置项目目录结构</div>
+                        </div>
+                    </div>
+
+                    <h3>标准项目目录结构</h3>
+                    <pre><code>project-root/
+├── .claude/                    # Claude Code 配置目录
+│   ├── CLAUDE.md              # 项目级提示词（优先级最高）
+│   ├── config.json            # 项目级配置
+│   ├── memory/                # 记忆存储目录
+│   │   ├── user/              # 用户偏好记忆
+│   │   ├── feedback/          # 反馈记忆
+│   │   └── project/           # 项目知识记忆
+│   ├── sessions/              # 会话历史存储
+│   └── skills/                # 项目级技能
+├── CLAUDE.md                   # 项目根目录提示词
+├── .claudeignore              # 忽略文件配置
+└── [项目文件...]</code></pre>
+
+                    <h3>配置文件优先级</h3>
+                    <div class="diagram">
+                        <pre><code>┌─────────────────────────────────────────────────────────────┐
+│                   配置文件优先级                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  优先级 1: ./.claude/CLAUDE.md    (项目级，最高)             │
+│     │                                                        │
+│     ▼                                                        │
+│  优先级 2: ./CLAUDE.md            (根目录)                   │
+│     │                                                        │
+│     ▼                                                        │
+│  优先级 3: ~/.claude/CLAUDE.md    (全局，最低)               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+                    </div>
+
+                    <h3>.claudeignore 文件</h3>
+                    <pre><code class="language-bash"># .claudeignore 示例
+
+# 忽略依赖目录
+node_modules/
+vendor/
+
+# 忽略构建输出
+dist/
+build/
+
+# 忽略敏感文件
+.env
+*.pem
+*.key</code></pre>
+                </article>
+
+                <!-- 第5章 -->
+                <article id="第5章-第一个项目">
+                    <div class="chapter-header">
+                        <div class="chapter-number">5</div>
+                        <div class="chapter-title">
+                            <h2>第一个项目</h2>
+                            <div class="chapter-subtitle">创建示例项目并体验基本功能</div>
+                        </div>
+                    </div>
+
+                    <h3>创建示例项目</h3>
+                    <pre><code class="language-bash"># 创建项目目录
+mkdir my-first-claude-project
+cd my-first-claude-project
+
+# 初始化 Git
+git init
+
+# 创建 CLAUDE.md
+cat > CLAUDE.md << 'EOF'
+# 项目说明
+
+这是一个示例项目，用于演示 Claude Code 的基本功能。
+
+## 技术栈
+- Node.js
+- TypeScript
+
+## 编码规范
+- 使用 2 空格缩进
+- 函数必须有注释
+EOF</code></pre>
+
+                    <h3>基本对话操作</h3>
+                    <p>启动 Claude Code：</p>
+                    <pre><code class="language-bash">claude</code></pre>
+
+                    <div class="info-card">
+                        <div class="info-card-title">💬 代码查询示例</div>
+                        <pre><code>用户: 请查看当前目录下有哪些文件？
+
+Claude: 我来查看当前目录的文件结构。
+[使用 Glob 工具]
+
+当前目录下有以下文件：
+- CLAUDE.md (项目配置文件)
+- .git/ (Git 仓库目录)</code></pre>
+                    </div>
+                </article>
+            </section>
+
+            <!-- 第二部分：功能详解 -->
+            <section id="第二部分功能详解">
+                <h2>第二部分：功能详解</h2>
+
+                <!-- 第6章 -->
+                <article id="第6章-记忆系统">
+                    <div class="chapter-header">
+                        <div class="chapter-number">6</div>
+                        <div class="chapter-title">
+                            <h2>记忆系统</h2>
+                            <div class="chapter-subtitle">跨会话保持和利用信息</div>
+                        </div>
+                    </div>
+
+                    <h3>记忆系统概述</h3>
+                    <p>Claude Code 的记忆系统是其核心特性之一，它允许 AI 跨会话保持和利用信息。</p>
+
+                    <div class="diagram">
+                        <pre><code>┌────────────────────────────────────────────────┐
+│                  记忆系统架构                    │
+├────────────────────────────────────────────────┤
+│                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────┐│
+│  │  短期记忆    │  │  工作记忆    │  │ 长期记忆 ││
+│  │  (Session)  │  │ (Context)   │  │(Memory) ││
+│  └─────────────┘  └─────────────┘  └─────────┘│
+│        │                │               │      │
+│        ▼                ▼               ▼      │
+│  当前会话内容      CLAUDE.md        磁盘存储    │
+│  对话历史         项目配置         跨会话知识   │
+│                                                 │
+└────────────────────────────────────────────────┘</code></pre>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>类型</th>
+                                <th>存储位置</th>
+                                <th>生命周期</th>
+                                <th>用途</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>短期记忆</td><td>内存</td><td>单次会话</td><td>当前对话上下文</td></tr>
+                            <tr><td>工作记忆</td><td>CLAUDE.md</td><td>项目级</td><td>项目特定知识</td></tr>
+                            <tr><td>长期记忆</td><td>~/.claude/memory/</td><td>永久</td><td>跨项目知识</td></tr>
+                        </tbody>
+                    </table>
+                </article>
+
+                <!-- 第7章 -->
+                <article id="第7章-钩子系统">
+                    <div class="chapter-header">
+                        <div class="chapter-number">7</div>
+                        <div class="chapter-title">
+                            <h2>钩子系统</h2>
+                            <div class="chapter-subtitle">在特定事件发生时执行自定义脚本</div>
+                        </div>
+                    </div>
+
+                    <h3>Hook 机制概述</h3>
+                    <p>钩子系统允许您在特定事件发生时执行自定义脚本，实现自动化工作流。</p>
+
+                    <div class="diagram">
+                        <pre><code>┌─────────────────────────────────────────┐
+│           Hook 执行流程                  │
+├─────────────────────────────────────────┤
+│                                          │
+│  事件触发 → PreToolUse → Tool执行        │
+│                          ↓               │
+│                     PostToolUse          │
+│                          ↓               │
+│  会话结束 → Stop                         │
+│                                          │
+└─────────────────────────────────────────┘</code></pre>
+                    </div>
+
+                    <h3>Hook 类型</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-card-title">PreToolUse</div>
+                            <div class="feature-card-desc">工具执行前触发，验证参数、阻止危险操作</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-title">PostToolUse</div>
+                            <div class="feature-card-desc">工具执行后触发，自动格式化、运行测试</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-title">Stop</div>
+                            <div class="feature-card-desc">会话结束时触发，清理临时文件、生成报告</div>
+                        </div>
+                    </div>
+
+                    <h3>Hook 配置</h3>
+                    <pre><code class="language-json">{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [{ "type": "command", "command": "prettier --write \"$CLAUDE_FILE_PATH\"" }]
+      }
+    ]
+  }
+}</code></pre>
+                </article>
+
+                <!-- 第8章 -->
+                <article id="第8章-命令行工具">
+                    <div class="chapter-header">
+                        <div class="chapter-number">8</div>
+                        <div class="chapter-title">
+                            <h2>命令行工具</h2>
+                            <div class="chapter-subtitle">丰富的命令行选项</div>
+                        </div>
+                    </div>
+
+                    <h3>核心命令</h3>
+                    <pre><code class="language-bash"># 启动交互会话
+claude
+
+# 指定工作目录
+claude --cwd /path/to/project
+
+# 使用特定模型
+claude --model claude-opus-4-6
+
+# 单次查询
+claude -p "解释这个函数的作用"
+
+# 继续上次会话
+claude --continue
+
+# 列出所有会话
+claude --list-sessions</code></pre>
+
+                    <h3>高级选项</h3>
+                    <pre><code class="language-bash"># Token 限制
+claude --max-tokens 8192
+
+# 温度参数
+claude --temperature 0.5
+
+# 允许特定工具
+claude --allow-tools Read,Write,Grep</code></pre>
+                </article>
+
+                <!-- 第9章 -->
+                <article id="第9章-技能系统">
+                    <div class="chapter-header">
+                        <div class="chapter-number">9</div>
+                        <div class="chapter-title">
+                            <h2>技能系统</h2>
+                            <div class="chapter-subtitle">定义可复用的提示词模板</div>
+                        </div>
+                    </div>
+
+                    <h3>内置技能</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-card-icon">🧪</div>
+                            <div class="feature-card-title">tdd</div>
+                            <div class="feature-card-desc">测试驱动开发</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-icon">🔍</div>
+                            <div class="feature-card-title">code-review</div>
+                            <div class="feature-card-desc">代码审查</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-icon">🔄</div>
+                            <div class="feature-card-title">refactor-clean</div>
+                            <div class="feature-card-desc">代码重构</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-icon">📝</div>
+                            <div class="feature-card-title">docs</div>
+                            <div class="feature-card-desc">文档生成</div>
+                        </div>
+                    </div>
+
+                    <h3>自定义技能</h3>
+                    <pre><code class="language-markdown">---
+name: api-design
+description: 设计 RESTful API 接口
+---
+
+# API 设计技能
+
+## 参数
+- resource: 资源名称
+- actions: 操作列表（可选）
+
+## 执行步骤
+1. 分析资源属性
+2. 设计 URL 路径
+3. 定义 HTTP 方法
+4. 设计请求/响应格式</code></pre>
+                </article>
+
+                <!-- 第10章 -->
+                <article id="第10章-插件系统">
+                    <div class="chapter-header">
+                        <div class="chapter-number">10</div>
+                        <div class="chapter-title">
+                            <h2>插件系统</h2>
+                            <div class="chapter-subtitle">更强大的扩展能力</div>
+                        </div>
+                    </div>
+
+                    <h3>插件开发</h3>
+                    <pre><code class="language-typescript">// src/tools/my-tool.ts
+import { Tool } from '@anthropic-ai/claude-code';
+
+export const myTool: Tool = {
+  name: 'my_tool',
+  description: '我的自定义工具',
+  parameters: {
+    type: 'object',
+    properties: {
+      input: { type: 'string', description: '输入参数' }
+    },
+    required: ['input']
+  },
+  async execute(params: { input: string }) {
+    return { success: true, result: `处理结果: ${params.input}` };
+  }
+};</code></pre>
+                </article>
+
+                <!-- 第11章 -->
+                <article id="第11章-提示词系统">
+                    <div class="chapter-header">
+                        <div class="chapter-number">11</div>
+                        <div class="chapter-title">
+                            <h2>提示词系统</h2>
+                            <div class="chapter-subtitle">编写高质量的提示词</div>
+                        </div>
+                    </div>
+
+                    <h3>提示词原则</h3>
+                    <ul>
+                        <li><strong>明确</strong>：清楚表达意图</li>
+                        <li><strong>具体</strong>：提供足够上下文</li>
+                        <li><strong>可执行</strong>：AI 能够理解和执行</li>
+                    </ul>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>问题</th>
+                                <th>改进</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>"优化代码"</td><td>"优化 sort 函数，减少时间复杂度"</td></tr>
+                            <tr><td>"修复 bug"</td><td>"修复登录时的 401 错误"</td></tr>
+                        </tbody>
+                    </table>
+                </article>
+
+                <!-- 第12章 -->
+                <article id="第12章-工具集">
+                    <div class="chapter-header">
+                        <div class="chapter-number">12</div>
+                        <div class="chapter-title">
+                            <h2>工具集</h2>
+                            <div class="chapter-subtitle">内置工具详解</div>
+                        </div>
+                    </div>
+
+                    <h3>工具调用流程</h3>
+                    <div class="diagram">
+                        <pre><code>AI 决策 → 工具选择 → 权限检查 → 参数验证 → 执行工具 → 返回结果</code></pre>
+                    </div>
+
+                    <h3>内置工具</h3>
+                    <div class="info-card">
+                        <div class="info-card-title">📖 Read / ✏️ Write / 🔧 Edit / ⚡ Bash / 🔍 Grep / 📁 Glob</div>
+                        <p>六大核心工具覆盖文件操作、命令执行、内容搜索等场景。</p>
+                    </div>
+                </article>
+
+                <!-- 第13章 -->
+                <article id="第13章-mcp-协议">
+                    <div class="chapter-header">
+                        <div class="chapter-number">13</div>
+                        <div class="chapter-title">
+                            <h2>MCP 协议</h2>
+                            <div class="chapter-subtitle">模型上下文协议</div>
+                        </div>
+                    </div>
+
+                    <h3>MCP 架构</h3>
+                    <div class="diagram">
+                        <pre><code>┌─────────────┐     ┌─────────────┐
+│ MCP Client  │ ←→  │ MCP Server  │
+│ (Claude)    │     │ (外部服务)   │
+└─────────────┘     └─────────────┘
+
+核心概念:
+- Resources: 可读取的数据源
+- Tools: 可调用的函数
+- Prompts: 预定义的提示词模板</code></pre>
+                    </div>
+
+                    <h3>MCP Server 开发</h3>
+                    <pre><code class="language-typescript">import { Server } from '@modelcontextprotocol/sdk';
+
+const server = new Server({ name: 'my-mcp-server', version: '1.0.0' });
+
+server.tool('read_file', {
+  description: '读取文件内容',
+  parameters: { type: 'object', properties: { path: { type: 'string' } }, required: ['path'] }
+}, async (params) => {
+  const content = await fs.readFile(params.path, 'utf-8');
+  return { content };
+});
+
+server.start();</code></pre>
+                </article>
+
+                <!-- 第14章 -->
+                <article id="第14章-子代理系统">
+                    <div class="chapter-header">
+                        <div class="chapter-number">14</div>
+                        <div class="chapter-title">
+                            <h2>子代理系统（Subagent）</h2>
+                            <div class="chapter-subtitle">并行处理复杂任务</div>
+                        </div>
+                    </div>
+
+                    <h3>核心优势</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>优势</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>并行处理</td><td>多个子代理同时执行独立任务</td></tr>
+                            <tr><td>上下文隔离</td><td>每个子代理拥有独立的上下文窗口</td></tr>
+                            <tr><td>专业分工</td><td>不同类型的子代理专注于特定领域</td></tr>
+                            <tr><td>结果聚合</td><td>主代理汇总各子代理结果</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>内置子代理</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-card-icon">🔍</div>
+                            <div class="feature-card-title">Explore</div>
+                            <div class="feature-card-desc">代码探索</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-icon">📋</div>
+                            <div class="feature-card-title">Plan</div>
+                            <div class="feature-card-desc">架构规划</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-icon">👁️</div>
+                            <div class="feature-card-title">code-reviewer</div>
+                            <div class="feature-card-desc">代码审查</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-icon">🔒</div>
+                            <div class="feature-card-title">security-reviewer</div>
+                            <div class="feature-card-desc">安全审查</div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- 第15章 -->
+                <article id="第15章-新功能">
+                    <div class="chapter-header">
+                        <div class="chapter-number">15</div>
+                        <div class="chapter-title">
+                            <h2>新功能</h2>
+                            <div class="chapter-subtitle">最新功能特性</div>
+                        </div>
+                    </div>
+
+                    <h3>Computer Use</h3>
+                    <p>允许 AI 直接与计算机桌面环境交互，实现 GUI 自动化操作。</p>
+                    <pre><code class="language-bash"># 启用 Computer Use 模式
+claude --computer-use</code></pre>
+
+                    <h3>多模态支持</h3>
+                    <pre><code class="language-bash"># 分析图像文件
+claude -p "分析这个 UI 截图" screenshot.png</code></pre>
+                </article>
+            </section>
+
+            <!-- 第三部分：编写指南 -->
+            <section id="第三部分编写指南">
+                <h2>第三部分：编写指南</h2>
+
+                <!-- 第16章 -->
+                <article id="第16章-如何写好-claudemd">
+                    <div class="chapter-header">
+                        <div class="chapter-number">16</div>
+                        <div class="chapter-title">
+                            <h2>如何写好 CLAUDE.md</h2>
+                            <div class="chapter-subtitle">项目级配置文件编写指南</div>
+                        </div>
+                    </div>
+
+                    <h3>CLAUDE.md 结构模板</h3>
+                    <pre><code class="language-markdown"># 项目名称
+
+> 一句话描述项目用途
+
+## 技术栈
+- **前端**: Vue 3 + TypeScript + Naive UI
+- **后端**: Node.js + Express
+
+## 编码规范
+
+### 命名约定
+- 组件: PascalCase
+- 函数: camelCase
+- 常量: UPPER_SNAKE_CASE
+
+## 禁止事项
+- ❌ 不要使用 `any` 类型
+- ❌ 不要跳过 TypeScript 类型检查
+
+## 测试要求
+- 单元测试覆盖率 >= 80%</code></pre>
+                </article>
+
+                <!-- 第17章 -->
+                <article id="第17章-如何写好-skills">
+                    <div class="chapter-header">
+                        <div class="chapter-number">17</div>
+                        <div class="chapter-title">
+                            <h2>如何写好 Skills</h2>
+                            <div class="chapter-subtitle">自定义技能开发指南</div>
+                        </div>
+                    </div>
+                    <p>请参考第9章技能系统的详细内容。</p>
+                </article>
+            </section>
+
+            <!-- 后续章节 -->
+            <section id="后续章节">
+                <h2>后续章节</h2>
+                <p>完整内容请参考原版 Markdown 文档。后续章节包括：</p>
+                <ul>
+                    <li>第四部分：交互与工作流</li>
+                    <li>第五部分：实战场景</li>
+                    <li>第六部分：深入原理</li>
+                    <li>第七部分：生态融合</li>
+                    <li>第八部分：对比分析</li>
+                    <li>附录</li>
+                </ul>
+            </section>
+
+            <!-- 附录 -->
+            <section id="附录">
+                <h2>附录</h2>
+
+                <h3>命令速查表</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>命令</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>claude</code></td><td>启动交互会话</td></tr>
+                        <tr><td><code>claude -p "提示词"</code></td><td>单次查询</td></tr>
+                        <tr><td><code>claude --continue</code></td><td>继续上次会话</td></tr>
+                        <tr><td><code>claude --model xxx</code></td><td>指定模型</td></tr>
+                        <tr><td><code>claude --cwd /path</code></td><td>指定工作目录</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>参考资源</h3>
+                <ul>
+                    <li><a href="https://claude.ai/code" target="_blank">Claude Code 官网</a></li>
+                    <li><a href="https://docs.anthropic.com" target="_blank">Anthropic 文档</a></li>
+                    <li><a href="https://github.com/anthropics/claude-code" target="_blank">GitHub 仓库</a></li>
+                </ul>
+            </section>
+
+            <!-- Footer -->
+            <footer style="margin-top: var(--space-2xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-color); text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+                <p>Claude Code 完全指南 v6.0 | 更新日期：2026-04-07</p>
+            </footer>
+        </div>
+    </main>
+
+    <!-- Fullscreen Exit Hint -->
+    <div class="fullscreen-hint">按 ESC 或点击全屏按钮退出全屏模式</div>
+
+    <script>
+        // Initialize highlight.js
+        hljs.highlightAll();
+
+        // Progress bar
+        function updateProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('progress').style.width = Math.min(progress, 100) + '%';
+        }
+
+        window.addEventListener('scroll', updateProgress);
+        updateProgress();
+
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const tocFab = document.getElementById('tocFab');
+
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            tocFab.classList.toggle('active');
+        }
+
+        // Section toggle
+        function toggleSection(header) {
+            const section = header.parentElement;
+            section.classList.toggle('collapsed');
+        }
+
+        // Fullscreen toggle
+        function toggleFullscreen() {
+            document.body.classList.toggle('fullscreen');
+            const btn = document.getElementById('fullscreenBtn');
+            btn.classList.toggle('active');
+
+            if (document.body.classList.contains('fullscreen')) {
+                btn.innerHTML = '⛶ 退出全屏';
+            } else {
+                btn.innerHTML = '⛶ 全屏';
+            }
+        }
+
+        // Active nav item
+        const sections = document.querySelectorAll('article[id], section[id]');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        function updateActiveNav() {
+            let current = '';
+            const headerHeight = 80;
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (window.scrollY >= sectionTop - headerHeight) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === '#' + current) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveNav);
+        updateActiveNav();
+
+        // Smooth scroll
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').slice(1);
+                const target = document.getElementById(targetId);
+                if (target) {
+                    const headerHeight = 80;
+                    const targetPosition = target.offsetTop - headerHeight;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                    // Close sidebar on mobile
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                }
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // ESC to close sidebar or exit fullscreen
+            if (e.key === 'Escape') {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar.classList.contains('active')) {
+                    toggleSidebar();
+                } else if (document.body.classList.contains('fullscreen')) {
+                    toggleFullscreen();
+                }
+            }
+            // F11 for fullscreen
+            if (e.key === 'F11') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            toggleSidebar();
+        });
+    </script>
+</body>
+</html>
