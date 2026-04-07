@@ -34,12 +34,31 @@
 - https://github.com/Kuberwastaken/claurst.git
 - https://github.com/lorryjovens-hub/claude-code-rust.git
 - https://github.com/srothgan/claude-code-rust.git
+- https://mp.weixin.qq.com/s/qGfSdDEjzKM6zrtaPBM-7w
+- https://github.com/adoresever/cloud-code.git
+- https://github.com/jiji262/build-code-agent.git
+- https://github.com/lintsinghua/claude-code-book.git
+- https://www.codefather.cn/post/2038945885362089985
+- https://hub.baai.ac.cn/view/53590
 
 ## CLAUDE.md文件
 
 - https://www.claude-code-hub.org/docs/config/claude-md
 - https://linguista.bearblog.dev/how-to-write-the-claudemd/
 - https://www.echovic.com/blog/ai/how-to-write-effective-claude-md/
+- https://www.xuanyuancode.com/learn-claude-code/tutorials/cu3
+- https://zhuanlan.zhihu.com/p/2009744974980331332
+- https://easyclaude.com/post/claude-code-claude-md
+
+## Skills
+
+- https://easyclaude.com/post/claude-code-skills
+- https://code.claude.com/docs/zh-CN/skills
+- https://datawhalechina.github.io/easy-vibe/zh-cn/stage-3/core-skills/skills/
+- https://www.runoob.com/claude-code/claude-code-ui-ux-pro-max-skill.html
+- https://www.huxiu.com/article/4844513.html
+- https://www.tophci.com/posts/251206-how-to-write-skills
+- https://zhuanlan.zhihu.com/p/1996724780209047225
 
 ## Subagent 子代理
 

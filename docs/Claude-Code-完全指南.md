@@ -1,6 +1,6 @@
 # Claude Code 完全指南
 
-> **版本：** 2.0.0
+> **版本：** 3.0.0
 > **更新日期：** 2026-04-07
 > **适用版本：** Claude Code CLI v1.x
 > **基于参考资源：** refer.md
@@ -27,20 +27,23 @@
   - [第11章 工具集](#第11章-工具集)
   - [第12章 MCP 协议](#第12章-mcp-协议)
   - [第13章 子代理系统](#第13章-子代理系统)
-- [第三部分：实战场景](#第三部分实战场景)
-  - [第14章 代码重构场景](#第14章-代码重构场景)
-  - [第15章 调试与修复场景](#第15章-调试与修复场景)
-  - [第16章 项目初始化场景](#第16章-项目初始化场景)
-- [第四部分：深入原理](#第四部分深入原理)
-  - [第17章 架构设计总览](#第17章-架构设计总览)
-  - [第18章 上下文压缩机制](#第18章-上下文压缩机制)
-  - [第19章 源码分析：核心引擎](#第19章-源码分析核心引擎)
-  - [第20章 源码分析：扩展系统](#第20章-源码分析扩展系统)
-- [第五部分：生态融合](#第五部分生态融合)
-  - [第21章 CLI-Anything 集成](#第21章-cli-anything-集成)
-  - [第22章 OpenCLI 集成](#第22章-opencli-集成)
-- [第六部分：对比分析](#第六部分对比分析)
-  - [第23章 与 Codex 智能体对比](#第23章-与-codex-智能体对比)
+- [第三部分：编写指南](#第三部分编写指南)
+  - [第14章 如何写好 CLAUDE.md](#第14章-如何写好-claudemd)
+  - [第15章 如何写好 Skills](#第15章-如何写好-skills)
+- [第四部分：实战场景](#第四部分实战场景)
+  - [第16章 代码重构场景](#第16章-代码重构场景)
+  - [第17章 调试与修复场景](#第17章-调试与修复场景)
+  - [第18章 项目初始化场景](#第18章-项目初始化场景)
+- [第五部分：深入原理](#第五部分深入原理)
+  - [第19章 架构设计总览](#第19章-架构设计总览)
+  - [第20章 上下文压缩机制](#第20章-上下文压缩机制)
+  - [第21章 源码分析：核心引擎](#第21章-源码分析核心引擎)
+  - [第22章 源码分析：扩展系统](#第22章-源码分析扩展系统)
+- [第六部分：生态融合](#第六部分生态融合)
+  - [第23章 CLI-Anything 集成](#第23章-cli-anything-集成)
+  - [第24章 OpenCLI 集成](#第24章-opencli-集成)
+- [第七部分：对比分析](#第七部分对比分析)
+  - [第25章 与 Codex 智能体对比](#第25章-与-codex-智能体对比)
 - [附录](#附录)
   - [A. 配置文件参考](#a-配置文件参考)
   - [B. 命令速查表](#b-命令速查表)
@@ -2486,11 +2489,1245 @@ Plan 代理正在分析项目结构...
 
 ---
 
-## 第三部分：实战场景
+## 第三部分：编写指南
 
-### 第14章 代码重构场景
+### 第14章 如何写好 CLAUDE.md
 
-#### 13.1 大规模重构流程
+#### 14.1 CLAUDE.md 概述
+
+CLAUDE.md 是 Claude Code 的核心配置文件，它充当项目的"说明书"，告诉 AI 如何理解和处理您的项目。一个优秀的 CLAUDE.md 可以显著提升 Claude Code 的工作效率和输出质量。
+
+**核心作用**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   CLAUDE.md 核心作用                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │ 项目身份    │  │ 编码规范    │  │ 工作流程    │         │
+│  │ 定义        │  │ 约束        │  │ 指导        │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│        │                │               │                    │
+│        ▼                ▼               ▼                    │
+│  技术栈说明        代码风格要求      开发流程步骤            │
+│  项目结构          命名规范          测试要求                │
+│  依赖关系          禁止事项          提交规范                │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              上下文注入 (Context Injection)          │    │
+│  │  每次对话自动加载，成为 AI 理解项目的基础            │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 14.2 文件位置与优先级
+
+**位置优先级**
+
+```
+优先级 1: ./CLAUDE.md          (当前目录，最高优先级)
+优先级 2: ./.claude/CLAUDE.md  (.claude 目录)
+优先级 3: ~/.claude/CLAUDE.md  (全局配置，最低优先级)
+```
+
+**加载规则**
+
+```markdown
+1. 从当前目录向上查找，直到找到 CLAUDE.md 或到达用户主目录
+2. 多个 CLAUDE.md 文件会按优先级合并
+3. 项目级配置会覆盖全局配置
+4. 子目录可以有自己的 CLAUDE.md 覆盖父目录配置
+```
+
+#### 14.3 CLAUDE.md 结构模板
+
+**完整模板**
+
+```markdown
+# 项目名称
+
+> 一句话描述项目用途
+
+## 项目概述
+
+简要描述项目的目标、背景和核心功能。
+
+## 技术栈
+
+- **前端**: Vue 3 + TypeScript + Naive UI
+- **后端**: Node.js + Express
+- **数据库**: PostgreSQL
+- **构建工具**: Vite
+- **测试框架**: Vitest
+
+## 项目结构
+
+\`\`\`
+project-root/
+├── src/
+│   ├── components/     # Vue 组件
+│   ├── composables/    # 组合式函数
+│   ├── api/           # API 调用
+│   ├── stores/        # 状态管理
+│   ├── utils/         # 工具函数
+│   └── types/         # 类型定义
+├── tests/             # 测试文件
+├── docs/              # 文档
+└── scripts/           # 脚本文件
+\`\`\`
+
+## 编码规范
+
+### 命名约定
+- 组件: PascalCase (如 `UserProfile.vue`)
+- 函数: camelCase (如 `getUserInfo`)
+- 常量: UPPER_SNAKE_CASE (如 `API_BASE_URL`)
+- 文件: kebab-case (如 `user-service.ts`)
+
+### 代码风格
+- 使用 2 空格缩进
+- 使用单引号
+- 语句末尾不加分号
+- 最大行宽 100 字符
+
+### 注释规范
+- 所有公共函数必须有 JSDoc 注释
+- 复杂逻辑必须有行内注释
+- 使用中文注释
+
+## 禁止事项
+
+- ❌ 不要使用 `any` 类型
+- ❌ 不要在组件中直接调用 API
+- ❌ 不要跳过 TypeScript 类型检查
+- ❌ 不要忽略 ESLint 警告
+- ❌ 不要提交 console.log 语句
+
+## 工作流程
+
+### 开发流程
+1. 从 main 分支创建 feature 分支
+2. 编写代码和测试
+3. 运行 `npm run lint` 检查代码
+4. 运行 `npm test` 确保测试通过
+5. 提交 PR 并等待审查
+
+### 提交规范
+- feat: 新功能
+- fix: 修复 bug
+- refactor: 重构
+- docs: 文档更新
+- test: 测试相关
+
+## 测试要求
+
+- 单元测试覆盖率 >= 80%
+- 所有新功能必须有测试
+- 修复 bug 必须添加回归测试
+
+## 常用命令
+
+\`\`\`bash
+npm run dev      # 启动开发服务器
+npm run build    # 构建生产版本
+npm test         # 运行测试
+npm run lint     # 代码检查
+npm run format   # 代码格式化
+\`\`\`
+
+## 注意事项
+
+### 性能优化
+- 使用虚拟滚动处理大列表
+- 图片使用懒加载
+- 组件使用动态导入
+
+### 安全要求
+- 所有用户输入必须验证
+- API 调用必须有错误处理
+- 敏感信息不能硬编码
+
+## 参考资源
+
+- [Vue 3 文档](https://vuejs.org/)
+- [TypeScript 手册](https://www.typescriptlang.org/docs/)
+- [项目 Wiki](./docs/wiki.md)
+```
+
+#### 14.4 编写最佳实践
+
+**原则一：明确具体**
+
+```markdown
+# ❌ 不好的写法
+## 编码规范
+代码要写好，要有注释。
+
+# ✅ 好的写法
+## 编码规范
+### 函数注释
+所有公共函数必须有 JSDoc 注释：
+
+\`\`\`typescript
+/**
+ * 计算两个日期之间的天数差
+ * @param startDate - 开始日期
+ * @param endDate - 结束日期
+ * @returns 天数差（正数表示 endDate 在 startDate 之后）
+ */
+function getDaysDiff(startDate: Date, endDate: Date): number {
+  const diffTime = endDate.getTime() - startDate.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+\`\`\`
+```
+
+**原则二：提供示例**
+
+```markdown
+# ❌ 不好的写法
+## API 调用
+使用 composables 封装 API 调用。
+
+# ✅ 好的写法
+## API 调用规范
+
+所有 API 调用必须封装在 composables 中：
+
+\`\`\`typescript
+// src/composables/useUserApi.ts
+import { ref } from 'vue';
+import { userApi } from '@/api/user';
+
+export function useUserApi() {
+  const loading = ref(false);
+  const error = ref<Error | null>(null);
+
+  const getUser = async (id: string) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      return await userApi.getUser(id);
+    } catch (e) {
+      error.value = e as Error;
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  return { loading, error, getUser };
+}
+\`\`\`
+
+使用示例：
+\`\`\`typescript
+const { loading, error, getUser } = useUserApi();
+const user = await getUser('123');
+\`\`\`
+```
+
+**原则三：说明原因**
+
+```markdown
+# ❌ 不好的写法
+## 禁止事项
+- 不要使用 any 类型
+
+# ✅ 好的写法
+## 禁止事项
+
+### 禁止使用 any 类型
+**原因**: any 类型会绕过 TypeScript 的类型检查，导致运行时错误难以发现。
+
+**替代方案**:
+- 使用 unknown 类型并进行类型守卫
+- 定义具体的接口类型
+- 使用泛型保持类型灵活性
+
+\`\`\`typescript
+// ❌ 错误
+function processData( any) {
+  return data.value;
+}
+
+// ✅ 正确
+interface Data {
+  value: string;
+}
+
+function processData( unknown): string {
+  if (typeof data === 'object' && data !== null && 'value' in data) {
+    return (data as Data).value;
+  }
+  throw new Error('Invalid data format');
+}
+\`\`\`
+```
+
+**原则四：保持更新**
+
+```markdown
+# ✅ 好的写法 - 标注更新日期
+## 编码规范
+
+> 最后更新: 2026-04-07
+> 更新人: 开发团队
+
+当项目技术栈或规范发生变化时，及时更新此文件。
+```
+
+#### 14.5 不同类型项目的 CLAUDE.md
+
+**前端项目模板**
+
+```markdown
+# 前端项目名称
+
+## 技术栈
+- 框架: Vue 3 / React 18
+- 语言: TypeScript
+- 样式: Uno CSS / Tailwind CSS
+- 状态管理: Pinia / Zustand
+- 构建工具: Vite
+
+## 组件规范
+- 组件必须有 PropTypes / TypeScript 接口
+- 组件必须有 emits 定义
+- 使用组合式 API / Hooks
+
+## 样式规范
+- 使用原子化 CSS
+- 颜色使用 CSS 变量
+- 响应式断点: 640px / 768px / 1024px / 1280px
+
+## 性能要求
+- 首屏加载 < 3s
+- Lighthouse 性能分数 > 90
+- 组件懒加载
+```
+
+**后端项目模板**
+
+```markdown
+# 后端项目名称
+
+## 技术栈
+- 运行时: Node.js 20
+- 框架: Express / Fastify
+- 语言: TypeScript
+- 数据库: PostgreSQL
+- ORM: Prisma
+
+## API 规范
+- RESTful 风格
+- 统一响应格式
+- 错误处理中间件
+
+## 安全要求
+- 所有端点必须有认证
+- 输入验证使用 Zod
+- SQL 使用参数化查询
+
+## 数据库规范
+- 迁移文件必须可回滚
+- 索引命名: idx_表名_字段名
+- 外键命名: fk_表名_字段名
+```
+
+**全栈项目模板**
+
+```markdown
+# 全栈项目名称
+
+## 架构
+- 前端: Vue 3 + TypeScript
+- 后端: Node.js + Express
+- 数据库: PostgreSQL
+- 缓存: Redis
+
+## 目录结构
+\`\`\`
+├── web/          # 前端代码
+├── server/       # 后端代码
+├── shared/       # 共享类型和工具
+└── infra/        # 基础设施配置
+\`\`\`
+
+## 开发规范
+- 前后端共享类型定义 (shared/types)
+- API 变更需要更新 OpenAPI 文档
+- 数据库变更需要迁移脚本
+```
+
+#### 14.6 高级技巧
+
+**条件性指令**
+
+```markdown
+## 环境相关配置
+
+### 开发环境
+当 NODE_ENV=development 时：
+- 启用详细日志
+- 禁用缓存
+- 使用 mock 数据
+
+### 生产环境
+当 NODE_ENV=production 时：
+- 禁用调试日志
+- 启用所有缓存
+- 使用真实 API
+```
+
+**引用外部文件**
+
+```markdown
+## 详细文档
+
+更多详细信息请参考：
+- [API 文档](./docs/api.md)
+- [数据库设计](./docs/database.md)
+- [部署指南](./docs/deployment.md)
+```
+
+**使用变量**
+
+```markdown
+## 项目配置
+
+- 项目名称: {{PROJECT_NAME}}
+- API 版本: {{API_VERSION}}
+- 默认端口: {{DEFAULT_PORT}}
+
+这些变量在项目初始化时会被替换。
+```
+
+#### 14.7 常见错误与修正
+
+| 错误 | 问题 | 修正 |
+|------|------|------|
+| 过于简短 | 信息不足，AI 无法理解 | 提供详细说明和示例 |
+| 过于冗长 | 加载慢，Token 浪费 | 精简内容，分文件引用 |
+| 缺少示例 | 抽象描述难以理解 | 添加代码示例 |
+| 不更新 | 规范与实际不符 | 定期维护更新 |
+| 模糊指令 | "代码要好" | "测试覆盖率 >= 80%" |
+
+#### 14.8 CLAUDE.md 检查清单
+
+```markdown
+## CLAUDE.md 完整性检查
+
+### 基础信息
+- [ ] 项目名称和描述
+- [ ] 技术栈列表
+- [ ] 项目结构说明
+
+### 编码规范
+- [ ] 命名约定
+- [ ] 代码风格
+- [ ] 注释规范
+
+### 工作流程
+- [ ] 开发流程
+- [ ] 提交规范
+- [ ] 测试要求
+
+### 约束条件
+- [ ] 禁止事项清单
+- [ ] 安全要求
+- [ ] 性能要求
+
+### 实用信息
+- [ ] 常用命令
+- [ ] 参考链接
+- [ ] 联系方式
+```
+
+---
+
+### 第15章 如何写好 Skills
+
+#### 15.1 Skills 概述
+
+Skills（技能）是 Claude Code 的可复用提示词模板，用于定义特定任务的工作流程和输出格式。通过编写高质量的 Skills，可以显著提升 Claude Code 处理特定类型任务的效率和一致性。
+
+**Skills vs CLAUDE.md**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              Skills vs CLAUDE.md 对比                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────────────┐  ┌─────────────────────┐          │
+│  │     CLAUDE.md       │  │      Skills         │          │
+│  ├─────────────────────┤  ├─────────────────────┤          │
+│  │ 项目级配置          │  │ 任务级模板          │          │
+│  │ 静态上下文          │  │ 动态工作流          │          │
+│  │ 自动加载            │  │ 手动调用            │          │
+│  │ 通用规范            │  │ 专用流程            │          │
+│  │ 一个项目一个        │  │ 多个技能并存        │          │
+│  └─────────────────────┘  └─────────────────────┘          │
+│                                                              │
+│  使用场景:                   使用场景:                       │
+│  - 定义项目规范              - 代码审查流程                  │
+│  - 设置编码标准              - 测试生成模板                  │
+│  - 提供项目上下文            - 文档生成格式                  │
+│  - 约束 AI 行为              - 重构工作流                    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 15.2 Skills 文件结构
+
+**基本结构**
+
+```markdown
+---
+name: skill-name
+description: 技能的简短描述
+trigger: 触发条件（可选）
+---
+
+# 技能标题
+
+技能的详细说明和使用方法。
+
+## 参数
+- param1: 参数1说明
+- param2: 参数2说明
+
+## 执行步骤
+
+1. 第一步
+2. 第二步
+3. 第三步
+
+## 输出格式
+
+描述期望的输出格式。
+
+## 示例
+
+\`\`\`
+/skill-name param1 value1
+\`\`\`
+```
+
+**完整示例**
+
+```markdown
+---
+name: api-design
+description: 设计 RESTful API 接口
+---
+
+# API 设计技能
+
+帮助您设计符合 RESTful 规范的 API 接口。
+
+## 参数
+- resource: 资源名称（必填）
+- actions: 操作列表（可选，默认为 CRUD）
+- version: API 版本（可选，默认为 v1）
+
+## 设计原则
+
+1. **资源命名**
+   - 使用名词复数形式
+   - 使用小写字母和连字符
+   - 避免动词前缀
+
+2. **HTTP 方法**
+   - GET: 查询资源
+   - POST: 创建资源
+   - PUT: 完整更新
+   - PATCH: 部分更新
+   - DELETE: 删除资源
+
+3. **状态码**
+   - 200: 成功
+   - 201: 创建成功
+   - 400: 请求错误
+   - 401: 未授权
+   - 404: 资源不存在
+   - 500: 服务器错误
+
+## 执行步骤
+
+1. 分析资源属性和关系
+2. 设计 URL 路径
+3. 定义 HTTP 方法
+4. 设计请求/响应格式
+5. 添加错误处理
+
+## 输出格式
+
+\`\`\`markdown
+## 资源: {resource}
+
+### 端点列表
+
+| 方法 | 路径 | 描述 | 认证 |
+|------|------|------|------|
+| GET | /api/v1/{resource} | 列表查询 | 可选 |
+| GET | /api/v1/{resource}/:id | 详情查询 | 可选 |
+| POST | /api/v1/{resource} | 创建资源 | 必需 |
+| PUT | /api/v1/{resource}/:id | 更新资源 | 必需 |
+| DELETE | /api/v1/{resource}/:id | 删除资源 | 必需 |
+
+### 请求示例
+
+**创建 {resource}**
+\`\`\`json
+{
+  "name": "示例名称",
+  "description": "示例描述"
+}
+\`\`\`
+
+### 响应示例
+
+**成功响应**
+\`\`\`json
+{
+  "code": 200,
+  "data": {
+    "id": "xxx",
+    "name": "示例名称",
+    "createdAt": "2026-04-07T00:00:00Z"
+  }
+}
+\`\`\`
+
+### 错误响应
+\`\`\`json
+{
+  "code": 400,
+  "error": "参数验证失败",
+  "details": ["name 不能为空"]
+}
+\`\`\`
+\`\`\`
+
+## 使用示例
+
+\`\`\`
+/api-design user
+/api-design product actions=create,read,update
+/api-design order version=v2
+\`\`\`
+```
+
+#### 15.3 Skills 编写最佳实践
+
+**原则一：单一职责**
+
+```markdown
+# ❌ 不好的写法 - 一个技能做太多事
+---
+name: full-stack-development
+description: 完成全栈开发所有工作
+---
+
+# ✅ 好的写法 - 单一职责
+---
+name: api-design
+description: 设计 RESTful API 接口
+---
+
+---
+name: database-schema
+description: 设计数据库表结构
+---
+
+---
+name: component-design
+description: 设计前端组件
+---
+```
+
+**原则二：明确输入输出**
+
+```markdown
+# ❌ 不好的写法
+## 输入
+用户提供一些信息。
+
+## 输出
+生成一些内容。
+
+# ✅ 好的写法
+## 参数
+- entityName: 实体名称（必填，字符串）
+- fields: 字段列表（必填，数组）
+- relations: 关联关系（可选，数组）
+
+## 输出
+生成以下内容：
+1. TypeScript 接口定义
+2. Zod 验证 Schema
+3. 示例数据
+```
+
+**原则三：提供步骤指导**
+
+```markdown
+# ❌ 不好的写法
+## 执行
+分析代码并给出建议。
+
+# ✅ 好的写法
+## 执行步骤
+
+### 步骤 1: 收集信息
+- 读取指定文件
+- 分析代码结构
+- 识别潜在问题
+
+### 步骤 2: 分析评估
+- 检查代码规范
+- 评估性能影响
+- 识别安全风险
+
+### 步骤 3: 生成报告
+- 按严重程度排序
+- 提供修复建议
+- 给出代码示例
+
+### 步骤 4: 确认执行
+- 用户确认后执行修改
+- 运行测试验证
+- 提交变更
+```
+
+**原则四：包含示例**
+
+```markdown
+## 使用示例
+
+**基本用法**
+\`\`\`
+/code-review src/utils/
+\`\`\`
+
+**指定文件**
+\`\`\`
+/code-review src/api/user.ts src/services/auth.ts
+\`\`\`
+
+**带选项**
+\`\`\`
+/code-review src/ --focus=security --severity=high
+\`\`\`
+
+**预期输出**
+\`\`\`
+## 代码审查报告
+
+### 文件: src/api/user.ts
+
+#### 高优先级问题
+1. **SQL 注入风险** (第 45 行)
+   - 问题: 直接拼接 SQL 语句
+   - 建议: 使用参数化查询
+   - 示例:
+     \`\`\`typescript
+     // ❌ 错误
+     const sql = `SELECT * FROM users WHERE id = ${id}`;
+
+     // ✅ 正确
+     const sql = 'SELECT * FROM users WHERE id = ?';
+     const result = await db.query(sql, [id]);
+     \`\`\`
+\`\`\`
+```
+
+#### 15.4 常用 Skills 模板
+
+**代码审查 Skill**
+
+```markdown
+---
+name: code-review
+description: 专业代码审查，检查质量、安全和可维护性
+---
+
+# 代码审查技能
+
+对代码进行全面审查，发现潜在问题并提供改进建议。
+
+## 参数
+- target: 审查目标（文件路径或目录）
+- focus: 审查重点（可选：quality/security/performance/all）
+- severity: 最低严重级别（可选：critical/high/medium/low）
+
+## 审查维度
+
+### 1. 代码质量
+- 可读性和命名规范
+- 函数复杂度（圈复杂度 < 10）
+- 代码重复（DRY 原则）
+- 注释完整性
+
+### 2. 安全性
+- 输入验证
+- SQL 注入风险
+- XSS 漏洞
+- 敏感数据处理
+
+### 3. 性能
+- 算法复杂度
+- 内存使用
+- 数据库查询优化
+- 缓存策略
+
+### 4. 可维护性
+- 模块化程度
+- 依赖管理
+- 测试覆盖率
+- 文档完整性
+
+## 执行步骤
+
+1. **扫描阶段**
+   - 读取目标文件
+   - 解析代码结构
+   - 收集上下文信息
+
+2. **分析阶段**
+   - 运行静态分析
+   - 检查编码规范
+   - 识别潜在问题
+
+3. **评估阶段**
+   - 按严重程度分类
+   - 计算影响范围
+   - 生成修复建议
+
+4. **报告阶段**
+   - 生成审查报告
+   - 提供代码示例
+   - 给出优先级建议
+
+## 输出格式
+
+\`\`\`markdown
+# 代码审查报告
+
+## 概述
+- 文件数量: X
+- 问题总数: Y
+- 严重: A | 高: B | 中: C | 低: D
+
+## 详细问题
+
+### 🔴 严重问题
+
+#### 1. [问题标题]
+- **文件**: path/to/file.ts
+- **位置**: 第 X 行
+- **问题**: 问题描述
+- **影响**: 影响说明
+- **建议**: 修复建议
+- **示例**:
+  \`\`\`typescript
+  // 修复后的代码
+  \`\`\`
+
+### 🟠 高优先级问题
+...
+
+### 🟡 中优先级问题
+...
+
+### 🟢 低优先级问题
+...
+
+## 改进建议
+
+1. 立即处理严重问题
+2. 计划处理高优先级问题
+3. 后续迭代处理中低优先级问题
+\`\`\`
+
+## 使用示例
+
+\`\`\`
+/code-review src/
+/code-review src/auth/ --focus=security
+/code-review src/api/ --severity=high
+\`\`\`
+```
+
+**测试生成 Skill**
+
+```markdown
+---
+name: generate-tests
+description: 为代码自动生成测试用例
+---
+
+# 测试生成技能
+
+为指定代码生成全面的测试用例，确保高覆盖率。
+
+## 参数
+- target: 目标文件路径
+- framework: 测试框架（jest/vitest/mocha，默认 vitest）
+- coverage: 目标覆盖率（默认 80）
+
+## 测试类型
+
+### 1. 单元测试
+- 正常输入测试
+- 边界条件测试
+- 异常输入测试
+- 返回值验证
+
+### 2. 集成测试
+- 模块间交互
+- API 调用
+- 数据库操作
+
+### 3. 边界测试
+- 空值处理
+- 极值处理
+- 类型边界
+
+## 执行步骤
+
+1. 分析代码结构
+2. 识别测试点
+3. 生成测试用例
+4. 添加 mock 和 fixture
+5. 验证覆盖率
+
+## 输出格式
+
+\`\`\`typescript
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { functionToTest } from './module';
+
+describe('functionToTest', () => {
+  // 正常情况
+  describe('正常输入', () => {
+    it('应该返回正确结果', () => {
+      expect(functionToTest('input')).toBe('expected');
+    });
+  });
+
+  // 边界情况
+  describe('边界条件', () => {
+    it('空字符串应该返回 null', () => {
+      expect(functionToTest('')).toBeNull();
+    });
+
+    it('null 应该抛出错误', () => {
+      expect(() => functionToTest(null)).toThrow();
+    });
+  });
+
+  // 异常情况
+  describe('异常处理', () => {
+    it('无效输入应该抛出错误', () => {
+      expect(() => functionToTest(123)).toThrow(TypeError);
+    });
+  });
+});
+\`\`\`
+
+## 使用示例
+
+\`\`\`
+/generate-tests src/utils/helper.ts
+/generate-tests src/api/user.ts --framework=jest
+/generate-tests src/services/ --coverage=90
+\`\`\`
+```
+
+**文档生成 Skill**
+
+```markdown
+---
+name: generate-docs
+description: 为代码生成文档
+---
+
+# 文档生成技能
+
+为代码生成清晰的文档，包括 API 文档、README 和代码注释。
+
+## 参数
+- target: 目标文件或目录
+- format: 输出格式（markdown/html/json，默认 markdown）
+- style: 文档风格（jsdoc/tsdoc/openapi）
+
+## 文档类型
+
+### 1. API 文档
+- 端点描述
+- 请求参数
+- 响应格式
+- 错误代码
+
+### 2. 代码注释
+- 函数说明
+- 参数描述
+- 返回值说明
+- 使用示例
+
+### 3. README
+- 项目介绍
+- 安装指南
+- 使用说明
+- 配置选项
+
+## 输出格式
+
+\`\`\`markdown
+# API 文档
+
+## 模块: User API
+
+### 概述
+用户管理相关的 API 端点。
+
+---
+
+## 端点: GET /api/users
+
+### 描述
+获取用户列表。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 描述 |
+|------|------|------|------|
+| page | number | 否 | 页码，默认 1 |
+| limit | number | 否 | 每页数量，默认 20 |
+| search | string | 否 | 搜索关键词 |
+
+### 响应
+
+**成功响应 (200)**
+\`\`\`json
+{
+  "data": [
+    {
+      "id": "string",
+      "name": "string",
+      "email": "string"
+    }
+  ],
+  "pagination": {
+    "total": 100,
+    "page": 1,
+    "limit": 20
+  }
+}
+\`\`\`
+
+### 示例
+
+\`\`\`bash
+curl -X GET "https://api.example.com/api/users?page=1&limit=10"
+\`\`\`
+\`\`\`
+
+## 使用示例
+
+\`\`\`
+/generate-docs src/api/
+/generate-docs src/ --format=html
+/generate-docs src/services/auth.ts --style=jsdoc
+\`\`\`
+```
+
+#### 15.5 Skills 文件管理
+
+**目录结构**
+
+```
+.claude/
+├── skills/
+│   ├── development/
+│   │   ├── code-review.md
+│   │   ├── generate-tests.md
+│   │   └── refactor.md
+│   ├── documentation/
+│   │   ├── generate-docs.md
+│   │   └── update-readme.md
+│   └── api/
+│       ├── api-design.md
+│       └── openapi-gen.md
+└── CLAUDE.md
+```
+
+**全局 Skills**
+
+```bash
+# 全局 Skills 位置
+~/.claude/skills/
+
+# 项目级 Skills 位置
+./.claude/skills/
+```
+
+**安装 Skills**
+
+```bash
+# 从本地文件安装
+cp my-skill.md ~/.claude/skills/
+
+# 从 Git 仓库安装
+git clone https://github.com/user/claude-skills.git ~/.claude/skills/
+
+# 使用符号链接
+ln -s /path/to/skills ~/.claude/skills/my-skills
+```
+
+#### 15.6 高级 Skills 技巧
+
+**条件执行**
+
+```markdown
+## 执行条件
+
+仅在以下条件满足时执行此技能：
+
+1. 目标文件必须存在
+2. 项目必须包含 package.json
+3. 必须已安装相关依赖
+
+\`\`\`markdown
+<!-- 如果条件不满足，输出 -->
+⚠️ 无法执行此技能：
+- 文件 xxx 不存在
+- 缺少必要依赖: xxx
+\`\`\`
+```
+
+**链式调用**
+
+```markdown
+## 后续步骤
+
+执行完此技能后，建议执行：
+
+1. `/generate-tests {target}` - 生成测试用例
+2. `/code-review {target}` - 审查生成的代码
+3. `/generate-docs {target}` - 更新文档
+```
+
+**参数验证**
+
+```markdown
+## 参数验证
+
+执行前验证参数：
+
+\`\`\`
+如果 entityName 为空:
+  输出: ❌ 错误: 必须提供 entityName 参数
+  显示帮助信息
+  退出
+
+如果 fields 不是数组:
+  输出: ❌ 错误: fields 必须是数组格式
+  显示示例
+  退出
+\`\`\`
+```
+
+#### 15.7 Skills 检查清单
+
+```markdown
+## Skills 完整性检查
+
+### 基础信息
+- [ ] 技能名称（简洁、描述性）
+- [ ] 技能描述（清晰说明用途）
+- [ ] 触发条件（如适用）
+
+### 参数定义
+- [ ] 所有参数已列出
+- [ ] 必填/可选已标注
+- [ ] 默认值已说明
+
+### 执行流程
+- [ ] 步骤清晰可执行
+- [ ] 每步有明确目标
+- [ ] 错误处理已考虑
+
+### 输出规范
+- [ ] 输出格式已定义
+- [ ] 包含示例输出
+- [ ] 格式易于理解
+
+### 使用示例
+- [ ] 基本用法示例
+- [ ] 高级用法示例
+- [ ] 预期输出展示
+```
+
+#### 15.8 Skills 与 CLAUDE.md 协同
+
+**协同模式**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              Skills 与 CLAUDE.md 协同工作                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │                   CLAUDE.md                          │    │
+│  │  定义项目规范、编码标准、禁止事项                     │    │
+│  │  作为所有对话的基础上下文                            │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                          │                                   │
+│                          ▼                                   │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │                    Skills                            │    │
+│  │  在 CLAUDE.md 规范基础上执行特定任务                 │    │
+│  │  遵循项目规范，生成符合标准的输出                    │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  示例:                                                       │
+│  CLAUDE.md 定义: "所有函数必须有 JSDoc 注释"                │
+│  Skills 执行: 生成的代码自动包含 JSDoc 注释                 │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**最佳实践**
+
+```markdown
+1. CLAUDE.md 定义通用规则
+   - 编码规范
+   - 命名约定
+   - 禁止事项
+
+2. Skills 定义具体流程
+   - 任务步骤
+   - 输出格式
+   - 验证规则
+
+3. 两者协同工作
+   - Skills 遵循 CLAUDE.md 规范
+   - CLAUDE.md 为 Skills 提供上下文
+   - 共同确保输出质量
+```
+
+---
+
+## 第四部分：实战场景
+
+### 第16章 代码重构场景
+
+#### 16.1 大规模重构流程
 
 **场景描述**
 
@@ -2566,7 +3803,7 @@ export function formatDate(
 
 ---
 
-### 第15章 调试与修复场景
+### 第17章 调试与修复场景
 
 #### 14.1 Bug 定位技巧
 
@@ -2627,7 +3864,7 @@ async handleUserUpdate(userId: string) {
 
 ---
 
-### 第16章 项目初始化场景
+### 第18章 项目初始化场景
 
 #### 15.1 项目脚手架
 
@@ -2684,9 +3921,9 @@ my-project/
 
 ---
 
-## 第四部分：深入原理
+## 第五部分：深入原理
 
-### 第17章 架构设计总览
+### 第19章 架构设计总览
 
 #### 16.1 整体架构
 
@@ -2799,7 +4036,7 @@ Claude Code 的架构设计遵循模块化和可扩展原则：
 
 ---
 
-### 第18章 上下文压缩机制
+### 第20章 上下文压缩机制
 
 #### 17.1 上下文管理挑战
 
@@ -2949,7 +4186,7 @@ claude -p "根据分析结果实现功能 X" analysis.md
 
 ---
 
-### 第19章 源码分析：核心引擎
+### 第21章 源码分析：核心引擎
 
 #### 18.1 源码结构概览
 
@@ -3585,7 +4822,7 @@ impl ApiClient {
 
 ---
 
-### 第20章 源码分析：扩展系统
+### 第22章 源码分析：扩展系统
 
 #### 19.1 扩展系统架构
 
@@ -4199,9 +5436,9 @@ struct ToolResult {
 
 ---
 
-## 第五部分：生态融合
+## 第六部分：生态融合
 
-### 第21章 CLI-Anything 集成
+### 第23章 CLI-Anything 集成
 
 #### 20.1 CLI-Anything 概述
 
@@ -4381,7 +5618,7 @@ cli-anything chain "analyze src/ | suggest improvements | apply"
 
 ---
 
-### 第22章 OpenCLI 集成
+### 第24章 OpenCLI 集成
 
 #### 21.1 OpenCLI 概述
 
@@ -4650,9 +5887,9 @@ impl Command for TestCommand {
 
 ---
 
-## 第六部分：对比分析
+## 第七部分：对比分析
 
-### 第23章 与 Codex 智能体对比
+### 第25章 与 Codex 智能体对比
 
 #### 23.1 概述
 
@@ -5364,8 +6601,22 @@ Claude Code 和 Codex Agent 代表了 AI 编程助手的两种不同设计哲学
 | [CLAUDE.md 配置指南](https://www.claude-code-hub.org/docs/config/claude-md) | 配置详解 |
 | [如何编写 CLAUDE.md](https://linguista.bearblog.dev/how-to-write-the-claudemd/) | 编写技巧 |
 | [高效 CLAUDE.md](https://www.echovic.com/blog/ai/how-to-write-effective-claude-md/) | 最佳实践 |
+| [CLAUDE.md 教程](https://www.xuanyuancode.com/learn-claude-code/tutorials/cu3) | 详细教程 |
+| [CLAUDE.md 实践](https://zhuanlan.zhihu.com/p/2009744974980331332) | 知乎专栏 |
+| [EasyClaude CLAUDE.md](https://easyclaude.com/post/claude-code-claude-md) | 完整指南 |
 
-#### D.7 生态项目
+#### D.7 Skills 资源
+
+| 资源 | 说明 |
+|------|------|
+| [Skills 官方文档](https://code.claude.com/docs/zh-CN/skills) | 官方技能文档 |
+| [EasyClaude Skills](https://easyclaude.com/post/claude-code-skills) | 技能编写指南 |
+| [Skills 教程](https://datawhalechina.github.io/easy-vibe/zh-cn/stage-3/core-skills/skills/) | 详细教程 |
+| [UI/UX Skills](https://www.runoob.com/claude-code/claude-code-ui-ux-pro-max-skill.html) | UI/UX 技能 |
+| [如何编写 Skills](https://www.tophci.com/posts/251206-how-to-write-skills) | 编写技巧 |
+| [Skills 实践](https://zhuanlan.zhihu.com/p/1996724780209047225) | 知乎专栏 |
+
+#### D.8 生态项目
 
 | 项目 | 说明 |
 |------|------|
@@ -5376,7 +6627,7 @@ Claude Code 和 Codex Agent 代表了 AI 编程助手的两种不同设计哲学
 | [claude-code-sdk-java](https://github.com/CyclingBits/claude-code-sdk-java) | Java SDK |
 | [claude-howto](https://github.com/luongnv89/claude-howto) | 使用教程 |
 
-#### D.8 Codex Agent 参考
+#### D.9 Codex Agent 参考
 
 | 资源 | 说明 |
 |------|------|
@@ -5384,6 +6635,6 @@ Claude Code 和 Codex Agent 代表了 AI 编程助手的两种不同设计哲学
 
 ---
 
-**文档版本：** 2.0.0
+**文档版本：** 3.0.0
 **最后更新：** 2026-04-07
 **贡献者：** Claude Code 学习社区
