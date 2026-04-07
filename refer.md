@@ -14,7 +14,6 @@
 - https://www.cnblogs.com/yupi/p/19810770
 - https://www.binance.com/zh-CN/square/post/307717007713906
 - https://zhuanlan.zhihu.com/p/2022433246449780672
-- https://claudecoding.dev/
 - https://zhuanlan.zhihu.com/p/2022442135182406883
 - https://github.com/shareAI-lab/learn-claude-code
 - https://github.com/CyclingBits/claude-code-sdk-java.git
@@ -40,6 +39,20 @@
 - https://github.com/lintsinghua/claude-code-book.git
 - https://www.codefather.cn/post/2038945885362089985
 - https://hub.baai.ac.cn/view/53590
+- https://claudecoding.dev/
+- https://github.com/ThreeFish-AI/analysis_claude_code.git
+- https://juejin.cn/post/7475675805391355955
+- https://zhuanlan.zhihu.com/p/1932839115000362158
+- https://www.gm7.org/archives/64391
+- https://segmentfault.com/a/1190000047693139
+- https://baoyu.io/blog/2026-04-01/learn-from-open-source
+- https://www.huxiu.com/article/4847328.html
+- https://wavespeed.ai/blog/zh-cn/posts/claude-code-leaked-source-hidden-features/
+- https://linux.do/t/topic/1865417
+- https://linux.do/t/topic/1871216
+- https://linux.do/t/topic/1866719
+- https://claudecn.com/docs/source-analysis/
+- https://southbridge-research.notion.site/claude-code-an-agentic-cleanroom-analysis
 
 ## CLAUDE.md文件
 
