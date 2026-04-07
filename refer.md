@@ -60,6 +60,10 @@
 - https://www.tophci.com/posts/251206-how-to-write-skills
 - https://zhuanlan.zhihu.com/p/1996724780209047225
 
+## Harness工程
+
+- https://www.xuanyuancode.com/articles/ee4edf5c-d9b4-4942-bdfd-0ecc5063f1f5
+
 ## Subagent 子代理
 
 - https://zhuanlan.zhihu.com/p/1961849176238294642
@@ -67,6 +71,40 @@
 - https://zhuanlan.zhihu.com/p/1935869095309447970
 - https://www.runoob.com/claude-code/claude-code-subagent.html
 - https://code.claude.com/docs/zh-CN/sub-agents
+
+## 交互模式
+
+- https://blog.frognew.com/2026/01/claude-code-interactive-mode-vim.html
+- https://www.runoob.com/claude-code/claude-code-cli.html
+- https://www.claude-cn.org/claude-code-docs-zh/reference/interactive-mode
+- https://code.claude.com/docs/zh-CN/interactive-mode
+- https://code.claude.com/docs/zh-CN/how-claude-code-works
+- https://code.claude.com/docs/zh-CN/common-workflows
+
+## 工作流程
+
+- https://www.claude-code-hub.org/docs/workflows
+- https://datawhalechina.github.io/easy-vibe/zh-cn/stage-3/core-skills/long-running-tasks/
+- https://claudecn.com/docs/claude-code/workflows/
+- https://www.xuanyuancode.com/articles/9348f947-b249-4051-b230-3e0c6aeef5c9
+
+## 命令大全
+
+- https://zhuanlan.zhihu.com/p/2021884176811434286
+- https://www.runoob.com/claude-code/claude-code-slash-commands.html
+- https://www.runoob.com/claude-code/claude-code-cli-ref.html
+- https://www.claude-code-hub.org/docs/commands
+
+## 目录结构
+
+- https://www.runoob.com/claude-code/claude-code-project.html
+- https://www.cnblogs.com/yoyo1216/p/19755828
+- https://code.claude.com/docs/zh-CN/overview
+
+## 新功能
+
+- [Computer Use](https://www.xuanyuancode.com/articles/71341bf4-cf29-45af-8417-dddb59215d67)
+
 
 ## 解析 Codex 智能体
 
