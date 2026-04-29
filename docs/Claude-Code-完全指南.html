@@ -693,10 +693,496 @@
             visibility: visible;
         }
 
+        /* Annotation Styles */
+        .annotation-highlight {
+            outline: 3px solid #a073d7 !important;
+            outline-offset: 2px !important;
+            border-radius: 4px !important;
+            padding: 2px 4px !important;
+            margin: 0 -2px !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            position: relative !important;
+            display: inline !important;
+            background: rgba(160, 115, 215, 0.15) !important;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
+
+        .annotation-highlight::before {
+            content: attr(data-index);
+            position: absolute;
+            top: -8px;
+            left: -3px;
+            background: linear-gradient(135deg, #a073d7, var(--spring-green));
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            line-height: 1.2;
+            z-index: 100;
+            box-shadow: 0 2px 6px rgba(160, 115, 215, 0.4);
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .annotation-highlight:hover {
+            background: rgba(160, 115, 215, 0.25) !important;
+            outline-color: #c9b8e8 !important;
+            box-shadow: 0 0 15px rgba(160, 115, 215, 0.5) !important;
+            transform: scale(1.01);
+        }
+
+        .annotation-highlight.active {
+            background: rgba(160, 115, 215, 0.35) !important;
+            outline: 4px solid #a073d7 !important;
+            outline-offset: 3px !important;
+            box-shadow: 0 0 20px rgba(160, 115, 215, 0.6), 0 0 40px rgba(160, 115, 215, 0.3) !important;
+            animation: annotationPulse 1.5s ease-in-out 3;
+        }
+
+        .annotation-toolbar {
+            position: absolute;
+            background: var(--bg-content);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            padding: 8px;
+            z-index: 1000;
+            display: none;
+            gap: 8px;
+        }
+
+        .annotation-toolbar.active {
+            display: flex;
+        }
+
+        .annotation-toolbar button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .annotation-toolbar .btn-annotate {
+            background: linear-gradient(135deg, var(--accent), var(--spring-green));
+            color: white;
+        }
+
+        .annotation-toolbar .btn-annotate:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(160, 115, 215, 0.3);
+        }
+
+        .annotation-toolbar .btn-cancel {
+            background: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .annotation-toolbar .btn-cancel:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .annotation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .annotation-modal.active {
+            display: flex;
+        }
+
+        .annotation-modal-content {
+            background: var(--bg-content);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .annotation-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-lg);
+        }
+
+        .annotation-modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .annotation-modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .annotation-modal-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-primary);
+        }
+
+        .annotation-selected-text {
+            background: rgba(160, 115, 215, 0.1);
+            padding: var(--space-md);
+            border-radius: 8px;
+            margin-bottom: var(--space-md);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            max-height: 120px;
+            overflow-y: auto;
+            border-left: 3px solid var(--accent);
+        }
+
+        .annotation-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: var(--space-md);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .annotation-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        .annotation-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-sm);
+            margin-top: var(--space-lg);
+        }
+
+        .annotation-modal-footer button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .annotation-btn-save {
+            background: linear-gradient(135deg, var(--accent), var(--spring-green));
+            color: white;
+        }
+
+        .annotation-btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(160, 115, 215, 0.3);
+        }
+
+        .annotation-btn-cancel {
+            background: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .annotation-btn-cancel:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main layout with annotation sidebar */
+        .main-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: var(--header-height);
+        }
+
+        .main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Annotation sidebar - always visible on right */
+        .annotation-sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            background: var(--bg-sidebar);
+            border-left: 1px solid var(--border-color);
+            height: calc(100vh - var(--header-height));
+            position: sticky;
+            top: var(--header-height);
+            overflow-y: auto;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+        }
+
+        .annotation-sidebar::-webkit-scrollbar { width: 4px; }
+        .annotation-sidebar::-webkit-scrollbar-track { background: transparent; }
+        .annotation-sidebar::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, rgba(160, 115, 215, 0.3), rgba(47, 132, 94, 0.3));
+            border-radius: 2px;
+        }
+
+        .annotation-sidebar-header {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background: var(--bg-sidebar);
+            z-index: 10;
+        }
+
+        .annotation-sidebar-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .annotation-sidebar-title .count {
+            background: var(--accent);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .annotation-sidebar-content {
+            padding: var(--space-md);
+        }
+
+        .annotation-item {
+            background: var(--bg-content);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: var(--space-md);
+            margin-bottom: var(--space-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .annotation-item:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-md);
+            transform: translateX(-2px);
+        }
+
+        .annotation-item.active {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .annotation-item-header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+        }
+
+        .annotation-item-index {
+            width: 22px;
+            height: 22px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .annotation-item-text {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .annotation-item-note {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            padding-left: calc(22px + var(--space-sm));
+        }
+
+        .annotation-item-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: var(--space-sm);
+            padding-top: var(--space-sm);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .annotation-item-date {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .annotation-item-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .annotation-item-actions button {
+            width: 26px;
+            height: 26px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .annotation-item-actions button:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .annotation-item-actions .btn-delete:hover {
+            background: rgba(254, 95, 88, 0.1);
+            color: var(--happy-red);
+        }
+
+        .annotation-empty {
+            text-align: center;
+            padding: var(--space-2xl);
+            color: var(--text-muted);
+        }
+
+        .annotation-empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-md);
+            opacity: 0.5;
+        }
+
+        .annotation-empty p {
+            font-size: 0.9rem;
+        }
+
+        .annotation-empty-hint {
+            font-size: 0.8rem !important;
+            margin-top: var(--space-sm);
+            opacity: 0.7;
+        }
+
+        /* Toggle button for annotation sidebar */
+        .annotation-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--accent), var(--spring-green));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            z-index: 200;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .annotation-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .annotation-toggle .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 20px;
+            height: 20px;
+            background: var(--happy-red);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+        }
+
+        /* Article styles */
+        article {
+            margin-bottom: var(--space-2xl);
+        }
+
+        /* Show toggle button on small screens */
+        @media (max-width: 1200px) {
+            .annotation-sidebar {
+                position: fixed;
+                right: 0;
+                top: var(--header-height);
+                height: calc(100vh - var(--header-height));
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                z-index: 500;
+            }
+
+            .annotation-sidebar.active {
+                transform: translateX(0);
+            }
+
+            .annotation-toggle {
+                display: flex;
+            }
+        }
+
+        /* Adjust main content width */
+        @media (min-width: 1201px) {
+            .main {
+                padding-right: var(--space-2xl);
+            }
+        }
+
         /* Print Styles */
         @media print {
-            .header, .sidebar, .sidebar-overlay, .toc-fab, .progress-bar, .fullscreen-hint {
+            .header, .sidebar, .sidebar-overlay, .toc-fab, .progress-bar, .fullscreen-hint,
+            .annotation-toolbar, .annotation-toggle, .annotation-sidebar {
                 display: none !important;
+            }
+            .main-container {
+                display: block;
             }
             .main {
                 padding: 20px !important;
@@ -707,6 +1193,10 @@
             }
             body.fullscreen .content-wrapper {
                 max-width: 100% !important;
+            }
+            .annotation-highlight {
+                border: 2px solid var(--accent);
+                background: rgba(160, 115, 215, 0.1);
             }
         }
 
@@ -779,6 +1269,7 @@
                     <span class="toggle-icon">▼</span>
                 </div>
                 <div class="sidebar-section-items">
+                    <a class="nav-item" href="#第一部分快速上手">第一部分概述</a>
                     <a class="nav-item" href="#第1章-认识-claude-code">第1章 认识 Claude Code</a>
                     <a class="nav-item" href="#第2章-安装与配置">第2章 安装与配置</a>
                     <a class="nav-item" href="#第3章-核心概念">第3章 核心概念</a>
@@ -793,6 +1284,7 @@
                     <span class="toggle-icon">▼</span>
                 </div>
                 <div class="sidebar-section-items">
+                    <a class="nav-item" href="#第二部分功能详解">第二部分概述</a>
                     <a class="nav-item" href="#第6章-记忆系统">第6章 记忆系统</a>
                     <a class="nav-item" href="#第7章-钩子系统">第7章 钩子系统</a>
                     <a class="nav-item" href="#第8章-命令行工具">第8章 命令行工具</a>
@@ -812,6 +1304,7 @@
                     <span class="toggle-icon">▼</span>
                 </div>
                 <div class="sidebar-section-items">
+                    <a class="nav-item" href="#第三部分编写指南">第三部分概述</a>
                     <a class="nav-item" href="#第16章-如何写好-claudemd">第16章 如何写好 CLAUDE.md</a>
                     <a class="nav-item" href="#第17章-如何写好-skills">第17章 如何写好 Skills</a>
                 </div>
@@ -819,18 +1312,85 @@
 
             <div class="sidebar-section">
                 <div class="sidebar-section-header" onclick="toggleSection(this)">
-                    <span>后续章节</span>
+                    <span>第四部分：交互与工作流</span>
                     <span class="toggle-icon">▼</span>
                 </div>
                 <div class="sidebar-section-items">
-                    <a class="nav-item" href="#后续章节">后续章节概览</a>
+                    <a class="nav-item" href="#第四部分交互与工作流">第四部分概述</a>
+                    <a class="nav-item" href="#第18章-交互模式">第18章 交互模式</a>
+                    <a class="nav-item" href="#第19章-工作流程">第19章 工作流程</a>
+                    <a class="nav-item" href="#第20章-cli-命令大全">第20章 CLI 命令大全</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header" onclick="toggleSection(this)">
+                    <span>第五部分：实战场景</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="sidebar-section-items">
+                    <a class="nav-item" href="#第五部分实战场景">第五部分概述</a>
+                    <a class="nav-item" href="#第21章-代码重构场景">第21章 代码重构场景</a>
+                    <a class="nav-item" href="#第22章-调试与修复场景">第22章 调试与修复场景</a>
+                    <a class="nav-item" href="#第23章-项目初始化场景">第23章 项目初始化场景</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header" onclick="toggleSection(this)">
+                    <span>第六部分：深入原理</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="sidebar-section-items">
+                    <a class="nav-item" href="#第六部分深入原理">第六部分概述</a>
+                    <a class="nav-item" href="#第24章-架构设计总览">第24章 架构设计总览</a>
+                    <a class="nav-item" href="#第25章-上下文压缩机制">第25章 上下文压缩机制</a>
+                    <a class="nav-item" href="#第26章-源码分析核心引擎">第26章 源码分析：核心引擎</a>
+                    <a class="nav-item" href="#第27章-源码分析扩展系统">第27章 源码分析：扩展系统</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header" onclick="toggleSection(this)">
+                    <span>第七部分：生态融合</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="sidebar-section-items">
+                    <a class="nav-item" href="#第七部分生态融合">第七部分概述</a>
+                    <a class="nav-item" href="#第28章-cli-anything-集成">第28章 CLI-Anything 集成</a>
+                    <a class="nav-item" href="#第29章-opencli-集成">第29章 OpenCLI 集成</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header" onclick="toggleSection(this)">
+                    <span>第八部分：对比分析</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="sidebar-section-items">
+                    <a class="nav-item" href="#第八部分对比分析">第八部分概述</a>
+                    <a class="nav-item" href="#第30章-与-codex-智能体对比">第30章 与 Codex 智能体对比</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header" onclick="toggleSection(this)">
+                    <span>附录</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="sidebar-section-items">
                     <a class="nav-item" href="#附录">附录</a>
+                    <a class="nav-item level-2" href="#a-配置文件参考">A. 配置文件参考</a>
+                    <a class="nav-item level-2" href="#b-命令速查表">B. 命令速查表</a>
+                    <a class="nav-item level-2" href="#c-常见问题解答">C. 常见问题解答</a>
+                    <a class="nav-item level-2" href="#d-参考资源索引">D. 参考资源索引</a>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
+    <div class="main-container">
     <main class="main">
         <div class="content-wrapper">
             <h1>Claude Code 完全指南</h1>
@@ -838,7 +1398,8 @@
             <blockquote>
                 <p><strong>版本：</strong> 6.0.0<br>
                 <strong>更新日期：</strong> 2026-04-07<br>
-                <strong>适用版本：</strong> Claude Code CLI v1.x</p>
+                <strong>适用版本：</strong> Claude Code CLI v1.x<br>
+                <strong>基于参考资源：</strong> refer.md</p>
             </blockquote>
 
             <!-- 序言 -->
@@ -911,7 +1472,7 @@
                         <tbody>
                             <tr>
                                 <td>运行环境</td>
-                                <td>✅ 终端</td>
+                                <td>终端</td>
                                 <td>IDE</td>
                                 <td>IDE</td>
                                 <td>Web</td>
@@ -933,6 +1494,13 @@
                             <tr>
                                 <td>自定义工具</td>
                                 <td>✅</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                            </tr>
+                            <tr>
+                                <td>离线使用</td>
+                                <td>❌</td>
                                 <td>❌</td>
                                 <td>❌</td>
                                 <td>❌</td>
@@ -1483,8 +2051,15 @@ export const myTool: Tool = {
 
                     <h3>内置工具</h3>
                     <div class="info-card">
-                        <div class="info-card-title">📖 Read / ✏️ Write / 🔧 Edit / ⚡ Bash / 🔍 Grep / 📁 Glob</div>
-                        <p>六大核心工具覆盖文件操作、命令执行、内容搜索等场景。</p>
+                        <div class="info-card-title">内置工具列表</div>
+                        <ul>
+                            <li><strong>Read</strong> - 读取文件内容</li>
+                            <li><strong>Write</strong> - 写入文件内容</li>
+                            <li><strong>Edit</strong> - 编辑文件</li>
+                            <li><strong>Bash</strong> - 执行 Shell 命令</li>
+                            <li><strong>Grep</strong> - 搜索文件内容</li>
+                            <li><strong>Glob</strong> - 匹配文件路径</li>
+                        </ul>
                     </div>
                 </article>
 
@@ -1596,6 +2171,9 @@ claude --computer-use</code></pre>
                     <h3>多模态支持</h3>
                     <pre><code class="language-bash"># 分析图像文件
 claude -p "分析这个 UI 截图" screenshot.png</code></pre>
+
+                    <h3>智能上下文压缩</h3>
+                    <p>更智能的上下文压缩算法，自动识别关键信息并进行压缩。</p>
                 </article>
             </section>
 
@@ -1646,29 +2224,309 @@ claude -p "分析这个 UI 截图" screenshot.png</code></pre>
                             <div class="chapter-subtitle">自定义技能开发指南</div>
                         </div>
                     </div>
-                    <p>请参考第9章技能系统的详细内容。</p>
+                    <p>Skills 是 Claude Code 的可复用提示词模板。详细的 Skills 编写指南请参考项目中相关文档。</p>
                 </article>
             </section>
 
-            <!-- 后续章节 -->
-            <section id="后续章节">
-                <h2>后续章节</h2>
-                <p>完整内容请参考原版 Markdown 文档。后续章节包括：</p>
-                <ul>
-                    <li>第四部分：交互与工作流</li>
-                    <li>第五部分：实战场景</li>
-                    <li>第六部分：深入原理</li>
-                    <li>第七部分：生态融合</li>
-                    <li>第八部分：对比分析</li>
-                    <li>附录</li>
-                </ul>
+            <!-- 第四部分：交互与工作流 -->
+            <section id="第四部分交互与工作流">
+                <h2>第四部分：交互与工作流</h2>
+
+                <!-- 第18章 -->
+                <article id="第18章-交互模式">
+                    <div class="chapter-header">
+                        <div class="chapter-number">18</div>
+                        <div class="chapter-title">
+                            <h2>交互模式</h2>
+                            <div class="chapter-subtitle">多种交互模式满足不同需求</div>
+                        </div>
+                    </div>
+
+                    <h3>交互模式分类</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-card-title">交互式模式</div>
+                            <div class="feature-card-desc">持续对话、多轮交互、上下文保持</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-title">单次执行模式</div>
+                            <div class="feature-card-desc">单次查询、快速任务、独立执行</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-title">管道模式</div>
+                            <div class="feature-card-desc">流式处理、脚本集成、自动化流程</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-title">Vim 模式</div>
+                            <div class="feature-card-desc">Vim 键绑定、编辑器风格、高效导航</div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- 第19章 -->
+                <article id="第19章-工作流程">
+                    <div class="chapter-header">
+                        <div class="chapter-number">19</div>
+                        <div class="chapter-title">
+                            <h2>工作流程</h2>
+                            <div class="chapter-subtitle">标准化的开发工作流</div>
+                        </div>
+                    </div>
+
+                    <h3>功能开发工作流</h3>
+                    <ol>
+                        <li><strong>需求理解</strong> - 明确功能和目标</li>
+                        <li><strong>方案设计</strong> - 规划技术方案</li>
+                        <li><strong>TDD 实现</strong> - 测试驱动开发</li>
+                        <li><strong>代码审查</strong> - 质量和安全检查</li>
+                        <li><strong>提交代码</strong> - 规范的提交信息</li>
+                    </ol>
+                </article>
+
+                <!-- 第20章 -->
+                <article id="第20章-cli-命令大全">
+                    <div class="chapter-header">
+                        <div class="chapter-number">20</div>
+                        <div class="chapter-title">
+                            <h2>CLI 命令大全</h2>
+                            <div class="chapter-subtitle">完整的命令行参考</div>
+                        </div>
+                    </div>
+
+                    <h3>核心命令速查</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>命令</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>claude</code></td><td>启动交互会话</td></tr>
+                            <tr><td><code>claude -p "提示词"</code></td><td>单次查询</td></tr>
+                            <tr><td><code>claude --continue</code></td><td>继续上次会话</td></tr>
+                            <tr><td><code>claude --model xxx</code></td><td>指定模型</td></tr>
+                            <tr><td><code>claude --cwd /path</code></td><td>指定工作目录</td></tr>
+                            <tr><td><code>claude --list-sessions</code></td><td>列出所有会话</td></tr>
+                            <tr><td><code>claude --diagnostics</code></td><td>运行诊断</td></tr>
+                        </tbody>
+                    </table>
+                </article>
+            </section>
+
+            <!-- 第五部分：实战场景 -->
+            <section id="第五部分实战场景">
+                <h2>第五部分：实战场景</h2>
+
+                <!-- 第21章 -->
+                <article id="第21章-代码重构场景">
+                    <div class="chapter-header">
+                        <div class="chapter-number">21</div>
+                        <div class="chapter-title">
+                            <h2>代码重构场景</h2>
+                            <div class="chapter-subtitle">大规模重构最佳实践</div>
+                        </div>
+                    </div>
+
+                    <h3>重构流程</h3>
+                    <ol>
+                        <li>分析现有代码结构</li>
+                        <li>制定重构计划</li>
+                        <li>渐进式重构</li>
+                        <li>测试验证</li>
+                        <li>代码审查</li>
+                    </ol>
+                </article>
+
+                <!-- 第22章 -->
+                <article id="第22章-调试与修复场景">
+                    <div class="chapter-header">
+                        <div class="chapter-number">22</div>
+                        <div class="chapter-title">
+                            <h2>调试与修复场景</h2>
+                            <div class="chapter-subtitle">高效的 Bug 定位与修复</div>
+                        </div>
+                    </div>
+
+                    <h3>调试技巧</h3>
+                    <ul>
+                        <li>使用 Grep 搜索错误信息</li>
+                        <li>分析日志文件</li>
+                        <li>检查相关代码上下文</li>
+                        <li>编写测试用例复现问题</li>
+                    </ul>
+                </article>
+
+                <!-- 第23章 -->
+                <article id="第23章-项目初始化场景">
+                    <div class="chapter-header">
+                        <div class="chapter-number">23</div>
+                        <div class="chapter-title">
+                            <h2>项目初始化场景</h2>
+                            <div class="chapter-subtitle">快速搭建项目脚手架</div>
+                        </div>
+                    </div>
+
+                    <h3>初始化步骤</h3>
+                    <ol>
+                        <li>创建项目目录结构</li>
+                        <li>配置 CLAUDE.md</li>
+                        <li>设置 .claudeignore</li>
+                        <li>初始化 Git 仓库</li>
+                        <li>配置开发环境</li>
+                    </ol>
+                </article>
+            </section>
+
+            <!-- 第六部分：深入原理 -->
+            <section id="第六部分深入原理">
+                <h2>第六部分：深入原理</h2>
+
+                <!-- 第24章 -->
+                <article id="第24章-架构设计总览">
+                    <div class="chapter-header">
+                        <div class="chapter-number">24</div>
+                        <div class="chapter-title">
+                            <h2>架构设计总览</h2>
+                            <div class="chapter-subtitle">Claude Code 整体架构</div>
+                        </div>
+                    </div>
+
+                    <h3>四层架构模型</h3>
+                    <div class="diagram">
+                        <pre><code>┌────────────────────────────────────────┐
+│           Presentation Layer           │
+│   CLI Parser  │   TUI/REPL  │  Output  │
+├────────────────────────────────────────┤
+│              Agent Layer               │
+│  Session │ Context │ Agent Loop │ etc. │
+├────────────────────────────────────────┤
+│              Tool Layer                │
+│  Tools │ Hooks │ Skills │ MCP Client  │
+├────────────────────────────────────────┤
+│          Infrastructure Layer          │
+│  Config │ API │ Storage │ Logger │ etc │
+└────────────────────────────────────────┘</code></pre>
+                    </div>
+                </article>
+
+                <!-- 第25章 -->
+                <article id="第25章-上下文压缩机制">
+                    <div class="chapter-header">
+                        <div class="chapter-number">25</div>
+                        <div class="chapter-title">
+                            <h2>上下文压缩机制</h2>
+                            <div class="chapter-subtitle">智能管理有限的上下文窗口</div>
+                        </div>
+                    </div>
+                    <p>Claude Code 使用智能上下文压缩算法，优先保留关键信息，压缩次要内容，最大化利用有限的上下文窗口。</p>
+                </article>
+
+                <!-- 第26章 -->
+                <article id="第26章-源码分析核心引擎">
+                    <div class="chapter-header">
+                        <div class="chapter-number">26</div>
+                        <div class="chapter-title">
+                            <h2>源码分析：核心引擎</h2>
+                            <div class="chapter-subtitle">深入理解核心实现</div>
+                        </div>
+                    </div>
+                    <p>核心引擎包括 Agent Loop、Session Manager、Context Manager 等关键组件。</p>
+                </article>
+
+                <!-- 第27章 -->
+                <article id="第27章-源码分析扩展系统">
+                    <div class="chapter-header">
+                        <div class="chapter-number">27</div>
+                        <div class="chapter-title">
+                            <h2>源码分析：扩展系统</h2>
+                            <div class="chapter-subtitle">工具、插件与 MCP 扩展机制</div>
+                        </div>
+                    </div>
+                    <p>扩展系统包括 Tool Dispatcher、Hook System、Plugin Loader 等组件。</p>
+                </article>
+            </section>
+
+            <!-- 第七部分：生态融合 -->
+            <section id="第七部分生态融合">
+                <h2>第七部分：生态融合</h2>
+
+                <!-- 第28章 -->
+                <article id="第28章-cli-anything-集成">
+                    <div class="chapter-header">
+                        <div class="chapter-number">28</div>
+                        <div class="chapter-title">
+                            <h2>CLI-Anything 集成</h2>
+                            <div class="chapter-subtitle">与 CLI-Anything 生态集成</div>
+                        </div>
+                    </div>
+                    <p>Claude Code 可以与 CLI-Anything 等工具集成，扩展其能力。</p>
+                </article>
+
+                <!-- 第29章 -->
+                <article id="第29章-opencli-集成">
+                    <div class="chapter-header">
+                        <div class="chapter-number">29</div>
+                        <div class="chapter-title">
+                            <h2>OpenCLI 集成</h2>
+                            <div class="chapter-subtitle">与 OpenCLI 标准集成</div>
+                        </div>
+                    </div>
+                    <p>通过 OpenCLI 标准，Claude Code 可以与更多工具和服务集成。</p>
+                </article>
+            </section>
+
+            <!-- 第八部分：对比分析 -->
+            <section id="第八部分对比分析">
+                <h2>第八部分：对比分析</h2>
+
+                <!-- 第30章 -->
+                <article id="第30章-与-codex-智能体对比">
+                    <div class="chapter-header">
+                        <div of="chapter-number">30</div>
+                        <div class="chapter-title">
+                            <h2>与 Codex 智能体对比</h2>
+                            <div class="chapter-subtitle">与其他 AI 编程工具对比</div>
+                        </div>
+                    </div>
+
+                    <h3>工具对比</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>特性</th>
+                                <th>Claude Code</th>
+                                <th>GitHub Copilot</th>
+                                <th>Cursor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>运行环境</td><td>终端</td><td>IDE</td><td>IDE</td></tr>
+                            <tr><td>项目级理解</td><td>✅</td><td>❌</td><td>✅</td></tr>
+                            <tr><td>命令执行</td><td>✅</td><td>❌</td><td>❌</td></tr>
+                            <tr><td>自定义工具</td><td>✅</td><td>❌</td><td>❌</td></tr>
+                        </tbody>
+                    </table>
+                </article>
             </section>
 
             <!-- 附录 -->
             <section id="附录">
                 <h2>附录</h2>
 
-                <h3>命令速查表</h3>
+                <h3 id="a-配置文件参考">A. 配置文件参考</h3>
+                <pre><code class="language-json">{
+  "model": "claude-sonnet-4-6",
+  "maxTokens": 4096,
+  "temperature": 0.7,
+  "autoApprove": false,
+  "permissions": {
+    "allow": ["Read", "Glob", "Grep"],
+    "deny": ["Bash"]
+  }
+}</code></pre>
+
+                <h3 id="b-命令速查表">B. 命令速查表</h3>
                 <table>
                     <thead>
                         <tr>
@@ -1682,10 +2540,22 @@ claude -p "分析这个 UI 截图" screenshot.png</code></pre>
                         <tr><td><code>claude --continue</code></td><td>继续上次会话</td></tr>
                         <tr><td><code>claude --model xxx</code></td><td>指定模型</td></tr>
                         <tr><td><code>claude --cwd /path</code></td><td>指定工作目录</td></tr>
+                        <tr><td><code>claude --list-sessions</code></td><td>列出所有会话</td></tr>
+                        <tr><td><code>claude --diagnostics</code></td><td>运行诊断</td></tr>
                     </tbody>
                 </table>
 
-                <h3>参考资源</h3>
+                <h3 id="c-常见问题解答">C. 常见问题解答</h3>
+                <h4>Q: 如何选择合适的模型？</h4>
+                <p>简单任务使用 Haiku，日常开发使用 Sonnet，复杂架构设计使用 Opus。</p>
+
+                <h4>Q: 如何保护敏感信息？</h4>
+                <p>使用 .claudeignore 排除敏感文件，配置权限限制。</p>
+
+                <h4>Q: 会话历史存储在哪里？</h4>
+                <p>存储在 ~/.claude/sessions/ 目录下。</p>
+
+                <h3 id="d-参考资源索引">D. 参考资源索引</h3>
                 <ul>
                     <li><a href="https://claude.ai/code" target="_blank">Claude Code 官网</a></li>
                     <li><a href="https://docs.anthropic.com" target="_blank">Anthropic 文档</a></li>
@@ -1700,8 +2570,54 @@ claude -p "分析这个 UI 截图" screenshot.png</code></pre>
         </div>
     </main>
 
+    <!-- Annotation Sidebar -->
+    <aside class="annotation-sidebar" id="annotationSidebar">
+        <div class="annotation-sidebar-header">
+            <div class="annotation-sidebar-title">
+                📝 批注
+                <span class="count" id="annotationCount">0</span>
+            </div>
+        </div>
+        <div class="annotation-sidebar-content" id="annotationSidebarContent">
+            <div class="annotation-empty">
+                <div class="annotation-empty-icon">📝</div>
+                <p>暂无批注</p>
+                <p class="annotation-empty-hint">选中文字后点击"添加批注"</p>
+            </div>
+        </div>
+    </aside>
+    </div><!-- End main-container -->
+
     <!-- Fullscreen Exit Hint -->
     <div class="fullscreen-hint">按 ESC 或点击全屏按钮退出全屏模式</div>
+
+    <!-- Annotation Toolbar -->
+    <div class="annotation-toolbar" id="annotationToolbar">
+        <button class="btn-annotate" onclick="showAnnotationModal()">📝 添加批注</button>
+        <button class="btn-cancel" onclick="hideAnnotationToolbar()">取消</button>
+    </div>
+
+    <!-- Annotation Modal -->
+    <div class="annotation-modal" id="annotationModal">
+        <div class="annotation-modal-content">
+            <div class="annotation-modal-header">
+                <div class="annotation-modal-title">📝 添加批注</div>
+                <button class="annotation-modal-close" onclick="closeAnnotationModal()">×</button>
+            </div>
+            <div class="annotation-selected-text" id="annotationSelectedText"></div>
+            <textarea class="annotation-textarea" id="annotationTextarea" placeholder="请输入您的批注内容..."></textarea>
+            <div class="annotation-modal-footer">
+                <button class="annotation-btn-cancel" onclick="closeAnnotationModal()">取消</button>
+                <button class="annotation-btn-save" onclick="saveAnnotation()">保存批注</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Annotation Toggle Button (for small screens) -->
+    <button class="annotation-toggle" id="annotationToggle" onclick="toggleAnnotationSidebar()">
+        📝
+        <span class="badge" id="annotationBadge">0</span>
+    </button>
 
     <script>
         // Initialize highlight.js
@@ -1816,6 +2732,511 @@ claude -p "分析这个 UI 截图" screenshot.png</code></pre>
         // Close sidebar when clicking outside on mobile
         document.getElementById('sidebarOverlay').addEventListener('click', function() {
             toggleSidebar();
+        });
+
+        // ==================== Annotation System ====================
+        const ANNOTATION_STORAGE_KEY = 'claude-code-guide-annotations';
+        let currentSelection = null;
+        let currentAnnotationId = null;
+        let annotations = [];
+
+        // Initialize annotations
+        function initAnnotations() {
+            loadAnnotations();
+            renderAnnotations();
+            updateAnnotationCounts();
+        }
+
+        // Load annotations from localStorage
+        function loadAnnotations() {
+            try {
+                const stored = localStorage.getItem(ANNOTATION_STORAGE_KEY);
+                annotations = stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                console.error('Failed to load annotations:', e);
+                annotations = [];
+            }
+        }
+
+        // Save annotations to localStorage
+        function saveAnnotationsToStorage() {
+            try {
+                localStorage.setItem(ANNOTATION_STORAGE_KEY, JSON.stringify(annotations));
+            } catch (e) {
+                console.error('Failed to save annotations:', e);
+            }
+        }
+
+        // Generate unique ID
+        function generateId() {
+            return 'ann_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Handle text selection
+        document.querySelector('.content-wrapper').addEventListener('mouseup', function(e) {
+            // Don't trigger on annotation highlights
+            if (e.target.closest('.annotation-highlight')) {
+                return;
+            }
+
+            setTimeout(() => {
+                const selection = window.getSelection();
+                const selectedText = selection.toString().trim();
+
+                if (selectedText.length > 0 && selectedText.length < 1000) {
+                    const range = selection.getRangeAt(0);
+                    const container = range.commonAncestorContainer;
+                    const element = container.nodeType === 3 ? container.parentElement : container;
+
+                    // Make sure selection is within content
+                    if (element.closest('.content-wrapper')) {
+                        currentSelection = {
+                            text: selectedText,
+                            range: range.cloneRange()
+                        };
+
+                        showAnnotationToolbar(e);
+                    }
+                } else {
+                    hideAnnotationToolbar();
+                }
+            }, 10);
+        });
+
+        // Show annotation toolbar
+        function showAnnotationToolbar(e) {
+            const toolbar = document.getElementById('annotationToolbar');
+            const x = e.pageX;
+            const y = e.pageY + 10;
+
+            toolbar.style.left = x + 'px';
+            toolbar.style.top = y + 'px';
+            toolbar.classList.add('active');
+        }
+
+        // Hide annotation toolbar
+        function hideAnnotationToolbar(clearSelection = true) {
+            const toolbar = document.getElementById('annotationToolbar');
+            toolbar.classList.remove('active');
+            if (clearSelection) {
+                currentSelection = null;
+            }
+        }
+
+        // Show annotation modal
+        function showAnnotationModal() {
+            if (!currentSelection) {
+                console.warn('No text selected for annotation');
+                return;
+            }
+
+            // Store the selected text in a more persistent way
+            const selectedTextToSave = currentSelection.text;
+            window.tempSelectedText = selectedTextToSave;
+
+            const modal = document.getElementById('annotationModal');
+            const selectedTextDiv = document.getElementById('annotationSelectedText');
+            const textarea = document.getElementById('annotationTextarea');
+
+            selectedTextDiv.textContent = selectedTextToSave;
+            textarea.value = '';
+            modal.classList.add('active');
+
+            // Hide toolbar but keep currentSelection
+            hideAnnotationToolbar(false);
+
+            // Focus textarea after modal is visible
+            setTimeout(() => textarea.focus(), 100);
+        }
+
+        // Close annotation modal
+        function closeAnnotationModal() {
+            const modal = document.getElementById('annotationModal');
+            modal.classList.remove('active');
+            currentSelection = null;
+            window.tempSelectedText = null;
+            window.editingAnnotationId = null;
+        }
+
+        // Save annotation
+        function saveAnnotation() {
+            const textarea = document.getElementById('annotationTextarea');
+            const note = textarea ? textarea.value.trim() : '';
+
+            // Use stored text if currentSelection is lost
+            const textToSave = currentSelection ? currentSelection.text : window.tempSelectedText;
+
+            if (!textToSave) {
+                alert('请先选中要批注的文字');
+                return;
+            }
+
+            if (!note) {
+                alert('请输入批注内容');
+                textarea.focus();
+                return;
+            }
+
+            const annotation = {
+                id: generateId(),
+                text: textToSave,
+                note: note,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            annotations.push(annotation);
+            saveAnnotationsToStorage();
+            renderAnnotations();
+            updateAnnotationCounts();
+            closeAnnotationModal();
+
+            // Clear selection and temp storage
+            window.getSelection().removeAllRanges();
+            window.tempSelectedText = null;
+
+            // Show success feedback
+            console.log('Annotation saved successfully:', annotation.id);
+        }
+
+        // Render annotations as highlights
+        function renderAnnotations() {
+            // Remove existing highlights
+            document.querySelectorAll('.annotation-highlight').forEach(el => {
+                const parent = el.parentNode;
+                while (el.firstChild) {
+                    parent.insertBefore(el.firstChild, el);
+                }
+                parent.removeChild(el);
+            });
+
+            // Normalize text nodes
+            document.querySelector('.content-wrapper').normalize();
+
+            // Apply highlights with index numbers
+            annotations.forEach((annotation, index) => {
+                try {
+                    highlightAnnotation(annotation, index + 1);
+                } catch (e) {
+                    console.warn('Failed to highlight annotation:', annotation.id, e);
+                }
+            });
+
+            renderAnnotationSidebar();
+        }
+
+        // Highlight a single annotation
+        function highlightAnnotation(annotation, index) {
+            const contentWrapper = document.querySelector('.content-wrapper');
+            if (!contentWrapper) return;
+
+            const searchText = annotation.text;
+
+            // Simple approach: find text in text nodes
+            const walker = document.createTreeWalker(
+                contentWrapper,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            let found = false;
+            let node;
+            while ((node = walker.nextNode()) && !found) {
+                // Skip if inside code/pre or already highlighted
+                if (node.parentElement.closest('pre, code, .annotation-highlight')) {
+                    continue;
+                }
+
+                const text = node.textContent;
+                const idx = text.indexOf(searchText);
+
+                if (idx !== -1) {
+                    try {
+                        const range = document.createRange();
+                        range.setStart(node, idx);
+                        range.setEnd(node, idx + searchText.length);
+
+                        const span = document.createElement('span');
+                        span.className = 'annotation-highlight';
+                        span.setAttribute('data-annotation-id', annotation.id);
+                        span.setAttribute('data-index', index);
+                        span.id = 'highlight-' + annotation.id;
+
+                        range.surroundContents(span);
+                        found = true;
+
+                        // Click handler
+                        span.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            // First scroll to this element to make sure it's visible
+                            this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Then highlight it
+                            this.classList.add('active');
+                            setTimeout(() => this.classList.remove('active'), 3000);
+                            // Scroll to annotation in sidebar
+                            scrollToAnnotationInSidebar(annotation.id);
+                        });
+
+                    } catch (e) {
+                        // Range error, trying next node
+                        console.warn('Range error for annotation:', annotation.id, e);
+                    }
+                }
+            }
+
+            if (!found) {
+                console.warn('Could not find text for annotation:', annotation.id, searchText.substring(0, 50));
+            }
+        }
+
+        // Update annotation counts
+        function updateAnnotationCounts() {
+            const badge = document.getElementById('annotationBadge');
+            const count = document.getElementById('annotationCount');
+
+            badge.textContent = annotations.length;
+            badge.style.display = annotations.length > 0 ? 'flex' : 'none';
+            count.textContent = annotations.length;
+        }
+
+        // Render annotation sidebar
+        function renderAnnotationSidebar() {
+            const content = document.getElementById('annotationSidebarContent');
+
+            if (annotations.length === 0) {
+                content.innerHTML = `
+                    <div class="annotation-empty">
+                        <div class="annotation-empty-icon">📝</div>
+                        <p>暂无批注</p>
+                        <p class="annotation-empty-hint">选中文字后点击"添加批注"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            content.innerHTML = annotations.map((annotation, index) => `
+                <div class="annotation-item" data-annotation-id="${annotation.id}" onclick="scrollToHighlight('${annotation.id}')">
+                    <div class="annotation-item-header">
+                        <div class="annotation-item-index">${index + 1}</div>
+                        <div class="annotation-item-text">${escapeHtml(annotation.text)}</div>
+                    </div>
+                    <div class="annotation-item-note">${escapeHtml(annotation.note)}</div>
+                    <div class="annotation-item-footer">
+                        <span class="annotation-item-date">${formatDate(annotation.createdAt)}</span>
+                        <div class="annotation-item-actions">
+                            <button onclick="event.stopPropagation(); editAnnotationById('${annotation.id}')" title="编辑">✏️</button>
+                            <button class="btn-delete" onclick="event.stopPropagation(); deleteAnnotationById('${annotation.id}')" title="删除">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Scroll to highlight in document
+        function scrollToHighlight(annotationId) {
+            const highlight = document.querySelector(`.annotation-highlight[data-annotation-id="${annotationId}"]`);
+
+            if (highlight) {
+                // Remove active from all highlights and items
+                document.querySelectorAll('.annotation-highlight').forEach(el => {
+                    el.classList.remove('active');
+                    el.style.outline = '';
+                    el.style.boxShadow = '';
+                });
+                document.querySelectorAll('.annotation-item').forEach(el => el.classList.remove('active'));
+
+                // Add active class and enhanced styling
+                highlight.classList.add('active');
+                highlight.style.outline = '4px solid #a073d7';
+                highlight.style.outlineOffset = '3px';
+                highlight.style.boxShadow = '0 0 20px rgba(160, 115, 215, 0.6), 0 0 40px rgba(160, 115, 215, 0.3)';
+
+                const sidebarItem = document.querySelector(`.annotation-item[data-annotation-id="${annotationId}"]`);
+                if (sidebarItem) {
+                    sidebarItem.classList.add('active');
+                }
+
+                // Scroll to highlight with offset for header
+                const headerHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 56;
+                const rect = highlight.getBoundingClientRect();
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const targetPosition = rect.top + scrollTop - headerHeight - 100;
+
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+
+                // Remove active state after animation
+                setTimeout(() => {
+                    highlight.classList.remove('active');
+                    highlight.style.outline = '';
+                    highlight.style.boxShadow = '';
+                }, 5000);
+            } else {
+                console.warn('Highlight not found for annotation:', annotationId);
+            }
+        }
+
+        // Scroll to annotation in sidebar (when clicking highlight in document)
+        function scrollToAnnotationInSidebar(annotationId) {
+            const sidebarItem = document.querySelector(`.annotation-item[data-annotation-id="${annotationId}"]`);
+            const sidebar = document.getElementById('annotationSidebar');
+
+            if (sidebarItem && sidebar) {
+                // Remove active from all
+                document.querySelectorAll('.annotation-highlight').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.annotation-item').forEach(el => el.classList.remove('active'));
+
+                // Add active
+                sidebarItem.classList.add('active');
+                const highlight = document.querySelector(`.annotation-highlight[data-annotation-id="${annotationId}"]`);
+                if (highlight) {
+                    highlight.classList.add('active');
+                }
+
+                // Scroll sidebar to item
+                sidebarItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Toggle annotation sidebar (for small screens)
+        function toggleAnnotationSidebar() {
+            const sidebar = document.getElementById('annotationSidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        // Edit annotation by ID
+        function editAnnotationById(annotationId) {
+            const annotation = annotations.find(a => a.id === annotationId);
+            if (!annotation) return;
+
+            // Store annotation text for editing
+            window.tempSelectedText = annotation.text;
+            window.editingAnnotationId = annotationId;
+
+            const modal = document.getElementById('annotationModal');
+            const selectedTextDiv = document.getElementById('annotationSelectedText');
+            const textarea = document.getElementById('annotationTextarea');
+
+            selectedTextDiv.textContent = annotation.text;
+            textarea.value = annotation.note;
+            modal.classList.add('active');
+
+            // Focus textarea after modal is visible
+            setTimeout(() => textarea.focus(), 100);
+        }
+
+        // Delete annotation by ID
+        function deleteAnnotationById(annotationId) {
+            if (confirm('确定要删除这条批注吗？')) {
+                annotations = annotations.filter(a => a.id !== annotationId);
+                saveAnnotationsToStorage();
+                renderAnnotations();
+                updateAnnotationCounts();
+            }
+        }
+
+        // Override save for edit mode
+        const originalSave = saveAnnotation;
+        saveAnnotation = function() {
+            const textarea = document.getElementById('annotationTextarea');
+            const note = textarea ? textarea.value.trim() : '';
+
+            if (window.editingAnnotationId) {
+                // Edit mode
+                const annotation = annotations.find(a => a.id === window.editingAnnotationId);
+                if (annotation) {
+                    if (!note) {
+                        alert('请输入批注内容');
+                        textarea.focus();
+                        return;
+                    }
+                    annotation.note = note;
+                    annotation.updatedAt = new Date().toISOString();
+                    saveAnnotationsToStorage();
+                    renderAnnotations();
+                    closeAnnotationModal();
+                    window.editingAnnotationId = null;
+                    window.tempSelectedText = null;
+                    return;
+                }
+            }
+            // New annotation mode
+            originalSave();
+        };
+
+        // Initialize on load
+        initAnnotations();
+
+        // Add pulse and highlight animations
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes annotationPulse {
+                0%, 100% {
+                    box-shadow: 0 0 0 0 rgba(160, 115, 215, 0.4);
+                    outline-color: #a073d7;
+                }
+                50% {
+                    box-shadow: 0 0 25px 8px rgba(160, 115, 215, 0.7);
+                    outline-color: #c9b8e8;
+                }
+            }
+            @keyframes highlightFound {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(47, 132, 94, 0);
+                }
+                50% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 30px 10px rgba(47, 132, 94, 0.5);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(47, 132, 94, 0);
+                }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // Close annotation modal when clicking on background
+        document.getElementById('annotationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAnnotationModal();
+            }
+        });
+
+        // Keyboard shortcut for closing modal with ESC
+        document.addEventListener('keydown', function(e) {
+            const modal = document.getElementById('annotationModal');
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeAnnotationModal();
+            }
+        });
+
+        // Close annotation sidebar when clicking outside on mobile
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('annotationSidebar');
+            const toggle = document.getElementById('annotationToggle');
+            if (window.innerWidth <= 1200 && sidebar.classList.contains('active')) {
+                if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
         });
     </script>
 </body>

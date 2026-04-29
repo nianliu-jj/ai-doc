@@ -122,3 +122,8 @@
 ## 解析 Codex 智能体
 
 - https://openai.com/zh-Hans-CN/index/unrolling-the-codex-agent-loop/
+
+## 让 AI 从「写代码」到「做项目」的组合拳
+- https://mp.weixin.qq.com/s/X-NKySPzSVs6zhvDkMpbBg
+- https://mp.weixin.qq.com/s/xjYmBrAR1Jxi0fMd_818Bg
+- https://mp.weixin.qq.com/s/1Ui39M4kyyz2-gSlD7OBdg
